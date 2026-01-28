@@ -9,6 +9,12 @@ const CompanyDashboard = ({ onClose }) => {
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 0, 28)); // 2026년 1월 28일
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(null); // 캘린더에서 선택한 날짜
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState({
+    workType: '',
+    startTime: '09:00',
+    endTime: '18:00',
+    workers: ''
+  });
 
   // 더미 데이터
   const employees = [
@@ -119,7 +125,7 @@ const CompanyDashboard = ({ onClose }) => {
             {[
               { id: 'dashboard', label: '대시보드', icon: TrendingUp },
               { id: 'employees', label: '근로자 관리', icon: Users },
-              { id: 'attendance', label: '출퇴근 현황', icon: Clock },
+              { id: 'attendance', label: '근무일정관리', icon: Clock },
               { id: 'stats', label: '통계', icon: Calendar }
             ].map(tab => (
               <button
@@ -380,11 +386,31 @@ const CompanyDashboard = ({ onClose }) => {
                   const lastDate = new Date(year, month + 1, 0).getDate();
                   const cells = [];
 
-                  // 더미 일정 데이터
+                  // 더미 일정 데이터 - 28일 이전 평일은 채워져있고, 29일 이후는 빈칸 (파란 계열로 통일)
                   const schedules = {
-                    '29': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-purple-50 border-purple-300' },
-                    '30': { workType: '포장 작업', startTime: '09:00', endTime: '17:00', workers: 5, color: 'bg-green-50 border-green-300' },
-                    '31': { workType: '재고 정리', startTime: '10:00', endTime: '16:00', workers: 4, color: 'bg-yellow-50 border-yellow-300' },
+                    '2': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-blue-50 border-blue-300' },
+                    '3': { workType: '포장 작업', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-sky-50 border-sky-300' },
+                    '5': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-blue-50 border-blue-300' },
+                    '6': { workType: '재고 정리', startTime: '10:00', endTime: '16:00', workers: 5, color: 'bg-cyan-50 border-cyan-300' },
+                    '7': { workType: '품질 검사', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-blue-50 border-blue-300' },
+                    '8': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-sky-50 border-sky-300' },
+                    '9': { workType: '배송 준비', startTime: '09:00', endTime: '17:00', workers: 4, color: 'bg-cyan-50 border-cyan-300' },
+                    '10': { workType: '포장 작업', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-blue-50 border-blue-300' },
+                    '12': { workType: '제품 검수', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-sky-50 border-sky-300' },
+                    '13': { workType: '재고 정리', startTime: '10:00', endTime: '16:00', workers: 5, color: 'bg-cyan-50 border-cyan-300' },
+                    '14': { workType: '기계 점검', startTime: '13:00', endTime: '17:00', workers: 3, color: 'bg-blue-50 border-blue-300' },
+                    '15': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-sky-50 border-sky-300' },
+                    '16': { workType: '품질 검사', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-cyan-50 border-cyan-300' },
+                    '17': { workType: '포장 작업', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-blue-50 border-blue-300' },
+                    '19': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-sky-50 border-sky-300' },
+                    '20': { workType: '제품 검수', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-cyan-50 border-cyan-300' },
+                    '21': { workType: '배송 준비', startTime: '09:00', endTime: '17:00', workers: 5, color: 'bg-blue-50 border-blue-300' },
+                    '22': { workType: '재고 정리', startTime: '10:00', endTime: '16:00', workers: 4, color: 'bg-sky-50 border-sky-300' },
+                    '23': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-cyan-50 border-cyan-300' },
+                    '24': { workType: '포장 작업', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-blue-50 border-blue-300' },
+                    '26': { workType: '품질 검사', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-sky-50 border-sky-300' },
+                    '27': { workType: '품질 검사', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-cyan-50 border-cyan-300' },
+                    '28': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-blue-50 border-blue-300' },
                   };
 
                   // 이전 달 빈 셀
@@ -504,6 +530,102 @@ const CompanyDashboard = ({ onClose }) => {
           </div>
         )}
       </div>
+
+      {/* 일정 등록 모달 */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-lg w-full">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">근무 일정 등록</h3>
+              <button
+                onClick={() => {
+                  setShowScheduleModal(false);
+                  setScheduleForm({ workType: '', startTime: '09:00', endTime: '18:00', workers: '' });
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            {selectedCalendarDate && (
+              <p className="text-gray-600 mb-6">
+                {selectedCalendarDate.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
+              </p>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">근무 내용</label>
+                <input
+                  type="text"
+                  value={scheduleForm.workType}
+                  onChange={(e) => setScheduleForm({ ...scheduleForm, workType: e.target.value })}
+                  placeholder="예: 제품 조립"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">시작 시간</label>
+                  <input
+                    type="time"
+                    value={scheduleForm.startTime}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, startTime: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">종료 시간</label>
+                  <input
+                    type="time"
+                    value={scheduleForm.endTime}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, endTime: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">투입 인원 (명)</label>
+                <input
+                  type="number"
+                  value={scheduleForm.workers}
+                  onChange={(e) => setScheduleForm({ ...scheduleForm, workers: e.target.value })}
+                  placeholder="예: 5"
+                  min="1"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={() => {
+                  setShowScheduleModal(false);
+                  setScheduleForm({ workType: '', startTime: '09:00', endTime: '18:00', workers: '' });
+                }}
+                className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={() => {
+                  // 실제로는 서버에 저장
+                  console.log('일정 저장:', { date: selectedCalendarDate, ...scheduleForm });
+                  setShowScheduleModal(false);
+                  setScheduleForm({ workType: '', startTime: '09:00', endTime: '18:00', workers: '' });
+                }}
+                disabled={!scheduleForm.workType || !scheduleForm.workers}
+                className="flex-1 py-3 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                저장
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
