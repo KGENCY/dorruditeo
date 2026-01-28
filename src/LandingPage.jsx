@@ -15,10 +15,12 @@ import heroImage1 from './assets/스크린샷 2026-01-28 오후 2.06.47.png';
 import heroImage2 from './assets/스크린샷 2026-01-28 오후 2.07.26.png';
 import heroImage3 from './assets/스크린샷 2026-01-28 오후 5.38.39.png';
 import AttendanceApp from './AttendanceApp';
+import CompanyDashboard from './CompanyDashboard';
 
 const LandingPage = () => {
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [showAttendanceApp, setShowAttendanceApp] = useState(false);
+  const [showCompanyDashboard, setShowCompanyDashboard] = useState(false);
   const heroImages = [
     heroImage1,
     heroImage2,
@@ -34,6 +36,10 @@ const LandingPage = () => {
 
   if (showAttendanceApp) {
     return <AttendanceApp onClose={() => setShowAttendanceApp(false)} />;
+  }
+
+  if (showCompanyDashboard) {
+    return <CompanyDashboard onClose={() => setShowCompanyDashboard(false)} />;
   }
 
   return (
@@ -89,7 +95,10 @@ const LandingPage = () => {
                 일자리 찾기
                 <ChevronRight className="w-5 h-5" />
               </button>
-              <button className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded font-medium text-lg hover:bg-gray-50 transition-colors shadow-sm">
+              <button
+                onClick={() => setShowCompanyDashboard(true)}
+                className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded font-medium text-lg hover:bg-gray-50 transition-colors shadow-sm"
+              >
                 기업 채용 문의
               </button>
             </div>
