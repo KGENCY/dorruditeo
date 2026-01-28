@@ -20,8 +20,10 @@ const AdminDashboard = ({ onClose }) => {
     activeWorkers: 142,
     attendanceRate: 94.5,
     expiringContracts: 5,
-    pendingIssues: 3,
-    monthlyRevenue: 45600000
+    pendingIssues: 14,
+    monthlyRevenue: 45600000,
+    newInquiries: 8,
+    pendingConsultations: 5
   };
 
   const companies = [
@@ -271,35 +273,35 @@ const AdminDashboard = ({ onClose }) => {
               </div>
 
               <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">계약 현황</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">이번 달 수수료 현황</h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">만료 임박</span>
-                    <span className="text-2xl font-bold text-red-600">{stats.expiringContracts}건</span>
+                    <span className="text-gray-600">예상 수수료 총액</span>
+                    <span className="text-2xl font-bold text-blue-600">₩4,560만</span>
                   </div>
                   <div className="text-sm text-gray-600">
-                    <p>• 3개월 이내 만료: 3건</p>
-                    <p>• 1개월 이내 만료: 2건</p>
+                    <p>• 정상 처리: 20개사</p>
+                    <p>• 재계산 필요: 4개사</p>
                   </div>
                   <button className="text-duru-orange-600 hover:text-duru-orange-700 font-semibold text-sm">
-                    전체보기 →
+                    상세보기 →
                   </button>
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">이번 달 정산</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">신규 문의 / 상담</h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">총 금액</span>
-                    <span className="text-2xl font-bold text-blue-600">₩{(stats.monthlyRevenue / 10000).toFixed(0)}만</span>
+                    <span className="text-gray-600">신규 문의</span>
+                    <span className="text-2xl font-bold text-purple-600">{stats.newInquiries}건</span>
                   </div>
                   <div className="text-sm text-gray-600">
-                    <p>• 정산 완료: 20개사</p>
-                    <p>• 정산 대기: 4개사</p>
+                    <p>• 미처리 상담: {stats.pendingConsultations}건</p>
+                    <p>• 이번 달 신규: {stats.newInquiries}건</p>
                   </div>
                   <button className="text-duru-orange-600 hover:text-duru-orange-700 font-semibold text-sm">
-                    상세보기 →
+                    전체보기 →
                   </button>
                 </div>
               </div>
