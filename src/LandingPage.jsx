@@ -14,9 +14,11 @@ import {
 import heroImage1 from './assets/스크린샷 2026-01-28 오후 2.06.47.png';
 import heroImage2 from './assets/스크린샷 2026-01-28 오후 2.07.26.png';
 import heroImage3 from './assets/스크린샷 2026-01-28 오후 5.38.39.png';
+import AttendanceApp from './AttendanceApp';
 
 const LandingPage = () => {
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
+  const [showAttendanceApp, setShowAttendanceApp] = useState(false);
   const heroImages = [
     heroImage1,
     heroImage2,
@@ -29,6 +31,10 @@ const LandingPage = () => {
     }, 4000);
     return () => clearInterval(timer);
   }, []);
+
+  if (showAttendanceApp) {
+    return <AttendanceApp onClose={() => setShowAttendanceApp(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-duru-ivory font-sans text-duru-text-main selection:bg-duru-orange-200">
@@ -46,7 +52,10 @@ const LandingPage = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <button className="text-base font-bold bg-duru-orange-500 text-white px-5 py-2.5 rounded hover:bg-duru-orange-600 transition-colors flex items-center gap-2 shadow-sm">
+            <button
+              onClick={() => setShowAttendanceApp(true)}
+              className="text-base font-bold bg-duru-orange-500 text-white px-5 py-2.5 rounded hover:bg-duru-orange-600 transition-colors flex items-center gap-2 shadow-sm"
+            >
               두루빛 출퇴근 바로가기
               <ChevronRight className="w-4 h-4" />
             </button>
