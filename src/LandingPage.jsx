@@ -16,11 +16,13 @@ import heroImage2 from './assets/스크린샷 2026-01-28 오후 2.07.26.png';
 import heroImage3 from './assets/스크린샷 2026-01-28 오후 5.38.39.png';
 import AttendanceApp from './AttendanceApp';
 import CompanyDashboard from './CompanyDashboard';
+import AdminDashboard from './AdminDashboard';
 
 const LandingPage = () => {
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [showAttendanceApp, setShowAttendanceApp] = useState(false);
   const [showCompanyDashboard, setShowCompanyDashboard] = useState(false);
+  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
   const heroImages = [
     heroImage1,
     heroImage2,
@@ -40,6 +42,10 @@ const LandingPage = () => {
 
   if (showCompanyDashboard) {
     return <CompanyDashboard onClose={() => setShowCompanyDashboard(false)} />;
+  }
+
+  if (showAdminDashboard) {
+    return <AdminDashboard onClose={() => setShowAdminDashboard(false)} />;
   }
 
   return (
@@ -91,7 +97,10 @@ const LandingPage = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 pt-4">
-              <button className="px-8 py-4 bg-duru-orange-500 text-white rounded font-medium text-lg hover:bg-duru-orange-600 transition-colors shadow-soft flex items-center gap-2">
+              <button
+                onClick={() => setShowAdminDashboard(true)}
+                className="px-8 py-4 bg-duru-orange-500 text-white rounded font-medium text-lg hover:bg-duru-orange-600 transition-colors shadow-soft flex items-center gap-2"
+              >
                 일자리 찾기
                 <ChevronRight className="w-5 h-5" />
               </button>
