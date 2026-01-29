@@ -4,17 +4,26 @@ import { ArrowLeft, Phone, LogIn, Clock, CheckCircle2, Home } from 'lucide-react
 const AttendanceApp = ({ onClose }) => {
   const [step, setStep] = useState('login'); // login, main, checkin, checkout, complete
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [showVerification, setShowVerification] = useState(false);
   const [userName, setUserName] = useState('');
   const [todos, setTodos] = useState([
-    { id: 1, text: '오전 회의 참석', checked: false },
-    { id: 2, text: '문서 작업 완료', checked: false },
-    { id: 3, text: '팀원과 협업', checked: false }
+    { id: 1, text: '제품 포장 작업', checked: false },
+    { id: 2, text: '부품 조립 작업', checked: false },
+    { id: 3, text: '작업장 정리정돈', checked: false }
   ]);
   const [workDone, setWorkDone] = useState('');
   const [attendanceType, setAttendanceType] = useState(''); // checkin or checkout
 
-  const handleLogin = () => {
+  const handleSendCode = () => {
     if (phoneNumber.length >= 10) {
+      setShowVerification(true);
+      // 실제로는 여기서 인증번호 발송 API 호출
+    }
+  };
+
+  const handleLogin = () => {
+    if (verificationCode.length === 6) {
       setUserName('홍길동'); // 실제로는 서버에서 받아올 데이터
       setStep('main');
     }
@@ -61,18 +70,62 @@ const AttendanceApp = ({ onClose }) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">전화번호</label>
-                <input
-                  type="tel"
-                  placeholder="010-0000-0000"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent"
-                />
+                <div className="relative">
+                  <input
+                    type="tel"
+                    placeholder="010-0000-0000"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    disabled={showVerification}
+                    className="w-full px-4 py-3 pr-28 border border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent disabled:bg-gray-100"
+                  />
+                  {!showVerification ? (
+                    <button
+                      onClick={handleSendCode}
+                      disabled={phoneNumber.length < 10}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold text-sm hover:bg-duru-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      인증
+                    </button>
+                  ) : (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      <span className="text-sm font-semibold text-green-600">인증됨</span>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {showVerification && (
+                <div className="animate-fadeIn">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">인증번호</label>
+                  <input
+                    type="text"
+                    placeholder="6자리 인증번호"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    maxLength={6}
+                    autoFocus
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg text-center tracking-wider focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent"
+                  />
+                  <p className="text-sm text-gray-600 mt-2">
+                    인증번호가 발송되었습니다. (유효시간 3분)
+                  </p>
+                  <button
+                    onClick={() => {
+                      setShowVerification(false);
+                      setVerificationCode('');
+                    }}
+                    className="text-sm text-duru-orange-600 hover:text-duru-orange-700 mt-2"
+                  >
+                    다시 받기
+                  </button>
+                </div>
+              )}
 
               <button
                 onClick={handleLogin}
-                disabled={phoneNumber.length < 10}
+                disabled={!showVerification || verificationCode.length !== 6}
                 className="w-full py-4 bg-duru-orange-500 text-white rounded-lg font-bold text-lg hover:bg-duru-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <LogIn className="w-5 h-5" />
