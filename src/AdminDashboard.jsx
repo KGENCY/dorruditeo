@@ -30,6 +30,15 @@ const AdminDashboard = ({ onClose }) => {
     adminId: '',
   });
   const [addCompanyComplete, setAddCompanyComplete] = useState({});
+  const [editingRevenue, setEditingRevenue] = useState(null); // {companyId: number}
+  const [revenueEditValue, setRevenueEditValue] = useState('');
+  const [companiesData, setCompaniesData] = useState([
+    { id: 1, name: '(주)두루빛 제조', industry: '제조업', location: '서울 강남구', workers: 15, contractEnd: '2026-12-31', status: 'active', revenue: 4500000 },
+    { id: 2, name: '세종식품', industry: '식품가공', location: '경기 성남시', workers: 12, contractEnd: '2026-03-15', status: 'expiring', revenue: 3600000 },
+    { id: 3, name: '한빛포장', industry: '포장/물류', location: '인천 남동구', workers: 18, contractEnd: '2027-06-30', status: 'active', revenue: 5400000 },
+    { id: 4, name: '그린팜', industry: '농업', location: '충남 천안시', workers: 8, contractEnd: '2026-02-28', status: 'expiring', revenue: 2400000 },
+    { id: 5, name: '참좋은케어', industry: '서비스업', location: '서울 송파구', workers: 10, contractEnd: '2026-09-15', status: 'active', revenue: 3000000 },
+  ]);
 
   const updateAddCompanyForm = (field, value) => {
     const newForm = { ...addCompanyForm, [field]: value };
@@ -65,13 +74,28 @@ const AdminDashboard = ({ onClose }) => {
     pendingConsultations: 5
   };
 
-  const companies = [
-    { id: 1, name: '(주)두루빛 제조', industry: '제조업', location: '서울 강남구', workers: 15, contractEnd: '2026-12-31', status: 'active', revenue: 4500000 },
-    { id: 2, name: '세종식품', industry: '식품가공', location: '경기 성남시', workers: 12, contractEnd: '2026-03-15', status: 'expiring', revenue: 3600000 },
-    { id: 3, name: '한빛포장', industry: '포장/물류', location: '인천 남동구', workers: 18, contractEnd: '2027-06-30', status: 'active', revenue: 5400000 },
-    { id: 4, name: '그린팜', industry: '농업', location: '충남 천안시', workers: 8, contractEnd: '2026-02-28', status: 'expiring', revenue: 2400000 },
-    { id: 5, name: '참좋은케어', industry: '서비스업', location: '서울 송파구', workers: 10, contractEnd: '2026-09-15', status: 'active', revenue: 3000000 },
-  ];
+  const startRevenueEdit = (companyId, currentRevenue) => {
+    setEditingRevenue(companyId);
+    setRevenueEditValue((currentRevenue / 10000).toString());
+  };
+
+  const saveRevenueEdit = (companyId) => {
+    const newRevenue = parseFloat(revenueEditValue) * 10000;
+    if (!isNaN(newRevenue) && newRevenue >= 0) {
+      setCompaniesData(prev =>
+        prev.map(company =>
+          company.id === companyId ? { ...company, revenue: newRevenue } : company
+        )
+      );
+    }
+    setEditingRevenue(null);
+    setRevenueEditValue('');
+  };
+
+  const cancelRevenueEdit = () => {
+    setEditingRevenue(null);
+    setRevenueEditValue('');
+  };
 
   const workers = [
     { id: 1, name: '김민수', company: '(주)두루빛 제조', department: '제조부', disability: '지체장애 3급', status: 'working', phone: '010-1234-5678', contractEnd: '2026-12-31' },
@@ -709,7 +733,7 @@ const AdminDashboard = ({ onClose }) => {
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              {companies.map(company => (
+              {companiesData.map(company => (
                 <div key={company.id} className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -759,7 +783,39 @@ const AdminDashboard = ({ onClose }) => {
                     </div>
                     <div className="text-right ml-4">
                       <p className="text-sm text-gray-600 mb-1">월 정산액</p>
-                      <p className="text-2xl font-bold text-blue-600">₩{(company.revenue / 10000).toFixed(0)}만</p>
+                      {editingRevenue === company.id ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            value={revenueEditValue}
+                            onChange={(e) => setRevenueEditValue(e.target.value)}
+                            placeholder="0"
+                            className="w-20 px-2 py-1 border border-duru-orange-500 rounded-lg text-lg font-bold text-blue-600 focus:outline-none focus:ring-2 focus:ring-duru-orange-500 text-right"
+                            autoFocus
+                          />
+                          <span className="text-sm text-gray-600">만원</span>
+                          <button
+                            onClick={() => saveRevenueEdit(company.id)}
+                            className="p-1 hover:bg-green-100 rounded"
+                          >
+                            <Check className="w-4 h-4 text-green-600" />
+                          </button>
+                          <button
+                            onClick={cancelRevenueEdit}
+                            className="p-1 hover:bg-red-100 rounded"
+                          >
+                            <X className="w-4 h-4 text-red-600" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => startRevenueEdit(company.id, company.revenue)}
+                          className="group flex items-center gap-1 hover:bg-gray-50 px-2 py-1 rounded transition-colors"
+                        >
+                          <p className="text-2xl font-bold text-blue-600">₩{(company.revenue / 10000).toFixed(0)}만</p>
+                          <Edit className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
