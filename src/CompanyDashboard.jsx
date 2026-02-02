@@ -29,7 +29,8 @@ const CompanyDashboard = ({ onClose }) => {
     disabilitySeverity: '',
     hireDate: '',
     recognitionDate: '',
-    workShift: '',
+    workDays: [],
+    workStartTime: '',
     workerId: '',
   });
   const [addWorkerComplete, setAddWorkerComplete] = useState({});
@@ -38,7 +39,14 @@ const CompanyDashboard = ({ onClose }) => {
     const newForm = { ...addWorkerForm, [field]: value };
     setAddWorkerForm(newForm);
     const newComplete = { ...addWorkerComplete };
-    if (value && value.toString().trim()) {
+    if (field === 'workDays') {
+      // 배열인 경우, 최소 1개 이상 선택되어야 함
+      if (value && Array.isArray(value) && value.length > 0) {
+        newComplete[field] = true;
+      } else {
+        delete newComplete[field];
+      }
+    } else if (value && value.toString().trim()) {
       newComplete[field] = true;
     } else {
       delete newComplete[field];
@@ -46,13 +54,18 @@ const CompanyDashboard = ({ onClose }) => {
     setAddWorkerComplete(newComplete);
   };
 
-  const addWorkerRequired = ['name', 'ssn', 'phone', 'gender', 'emergencyName', 'emergencyRelation', 'emergencyPhone', 'disabilityType', 'disabilityGrade', 'disabilitySeverity', 'hireDate', 'recognitionDate', 'workShift', 'workerId'];
+  const addWorkerRequired = ['name', 'ssn', 'phone', 'gender', 'emergencyName', 'emergencyRelation', 'emergencyPhone', 'disabilityType', 'disabilityGrade', 'disabilitySeverity', 'hireDate', 'recognitionDate', 'workDays', 'workStartTime', 'workerId'];
 
   const handleAddWorkerSubmit = () => {
-    const allFilled = addWorkerRequired.every(f => addWorkerForm[f] && addWorkerForm[f].toString().trim());
+    const allFilled = addWorkerRequired.every(f => {
+      if (f === 'workDays') {
+        return addWorkerForm[f] && Array.isArray(addWorkerForm[f]) && addWorkerForm[f].length > 0;
+      }
+      return addWorkerForm[f] && addWorkerForm[f].toString().trim();
+    });
     if (!allFilled) return;
     setShowAddWorkerModal(false);
-    setAddWorkerForm({ name: '', ssn: '', phone: '', gender: '', emergencyName: '', emergencyRelation: '', emergencyPhone: '', disabilityType: '', disabilityGrade: '', disabilitySeverity: '', hireDate: '', recognitionDate: '', workShift: '', workerId: '' });
+    setAddWorkerForm({ name: '', ssn: '', phone: '', gender: '', emergencyName: '', emergencyRelation: '', emergencyPhone: '', disabilityType: '', disabilityGrade: '', disabilitySeverity: '', hireDate: '', recognitionDate: '', workDays: [], workStartTime: '', workerId: '' });
     setAddWorkerComplete({});
   };
 
@@ -861,23 +874,55 @@ const CompanyDashboard = ({ onClose }) => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">
-                      근무 시간대 <span className="text-duru-orange-500">*</span>
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      근무 요일 <span className="text-duru-orange-500">*</span>
                     </label>
-                    <div className="flex gap-2">
-                      {['오전 근무', '오후 근무'].map((shift) => (
-                        <button
-                          key={shift}
-                          onClick={() => updateAddWorkerForm('workShift', shift)}
-                          className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-colors border ${
-                            addWorkerForm.workShift === shift
-                              ? 'bg-duru-orange-500 text-white border-duru-orange-500'
-                              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {shift}
-                        </button>
-                      ))}
+                    <div className="grid grid-cols-7 gap-2 mb-3">
+                      {['월', '화', '수', '목', '금', '토', '일'].map((day) => {
+                        const isSelected = addWorkerForm.workDays.includes(day);
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => {
+                              const newWorkDays = isSelected
+                                ? addWorkerForm.workDays.filter(d => d !== day)
+                                : [...addWorkerForm.workDays, day];
+                              updateAddWorkerForm('workDays', newWorkDays);
+                            }}
+                            className={`py-2.5 rounded-lg text-sm font-semibold transition-colors border ${
+                              isSelected
+                                ? 'bg-duru-orange-500 text-white border-duru-orange-500'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {addWorkerComplete.workDays && (
+                      <div className="flex items-center gap-1 text-xs text-green-600 mb-3">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>{addWorkerForm.workDays.join(', ')} 선택됨</span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      출근 시간 <span className="text-duru-orange-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="time"
+                        value={addWorkerForm.workStartTime}
+                        onChange={(e) => updateAddWorkerForm('workStartTime', e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent text-gray-700"
+                      />
+                      {addWorkerComplete.workStartTime && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
                     </div>
                   </div>
                 </div>
