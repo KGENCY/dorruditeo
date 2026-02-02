@@ -66,11 +66,11 @@ const LandingPage = () => {
             </nav>
             <button
               onClick={() => setShowAdminDashboard(true)}
-              className="text-sm font-medium text-gray-500 px-4 py-2 rounded border border-gray-200 hover:text-gray-700 hover:border-gray-300 transition-colors flex items-center gap-1.5"
+              className="text-base font-semibold text-white bg-duru-orange-500 px-6 py-2.5 rounded hover:bg-duru-orange-600 transition-colors flex items-center gap-2 shadow-sm"
             >
-              <Shield className="w-3.5 h-3.5" />
-              관리자 페이지
-              <ChevronRight className="w-3.5 h-3.5" />
+              <Shield className="w-4 h-4" />
+              두루빛 관리자
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
