@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Users, Building2, TrendingUp, AlertCircle, DollarSign, FileText, Search, Bell, Calendar, UserCheck, Clock, ChevronRight, Edit, Eye, Download, Upload, MessageSquare, Filter, Save, X, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Users, Building2, TrendingUp, AlertCircle, DollarSign, FileText, Search, Bell, Calendar, UserCheck, Clock, ChevronRight, Edit, Eye, Download, Upload, MessageSquare, Filter, Save, X, Check, ChevronDown, ChevronUp, BarChart3, Printer } from 'lucide-react';
 import AdminWorkerDetail from './AdminWorkerDetail';
 import CompanyDetail from './CompanyDetail';
 
 const AdminDashboard = ({ onClose }) => {
-  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, companies, workers, contracts, notifications, reports
+  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, companies, workers, workstats, notifications, reports
+  const [selectedMonth, setSelectedMonth] = useState('2026-01');
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [editingCell, setEditingCell] = useState(null); // {companyId, workerId, field}
@@ -134,6 +135,31 @@ const AdminDashboard = ({ onClose }) => {
     companyName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // 근무 통계 데이터 (월별 근무시간)
+  const monthlyWorkStats = {
+    '(주)두루빛 제조': [
+      { id: 1, name: '김민수', department: '제조부', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
+      { id: 2, name: '이영희', department: '포장부', totalHours: 168, avgHours: 7.6, workDays: 22, lateDays: 1 },
+      { id: 7, name: '김수진', department: '제조부', totalHours: 172, avgHours: 7.8, workDays: 22, lateDays: 0 },
+    ],
+    '세종식품': [
+      { id: 3, name: '박철수', department: '생산부', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
+      { id: 8, name: '이민호', department: '생산부', totalHours: 160, avgHours: 7.3, workDays: 22, lateDays: 3 },
+    ],
+    '한빛포장': [
+      { id: 4, name: '정미라', department: '품질관리', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 2 },
+      { id: 9, name: '박지영', department: '포장부', totalHours: 175, avgHours: 8.0, workDays: 22, lateDays: 0 },
+    ],
+    '그린팜': [
+      { id: 5, name: '최동욱', department: '재배', totalHours: 140, avgHours: 6.4, workDays: 22, lateDays: 5 },
+      { id: 10, name: '강태민', department: '재배', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
+    ],
+  };
+
+  const handlePrint = (companyName) => {
+    window.print();
+  };
+
   // 상세보기 페이지 렌더링
   if (selectedWorker) {
     return <AdminWorkerDetail worker={selectedWorker} onClose={() => setSelectedWorker(null)} />;
@@ -183,7 +209,7 @@ const AdminDashboard = ({ onClose }) => {
               { id: 'dashboard', label: '대시보드', icon: TrendingUp },
               { id: 'companies', label: '회원사 관리', icon: Building2 },
               { id: 'workers', label: '근로자 관리', icon: Users },
-              { id: 'contracts', label: '계약/정산', icon: DollarSign },
+              { id: 'workstats', label: '근무 통계', icon: BarChart3 },
               { id: 'notifications', label: '알림센터', icon: Bell },
               { id: 'reports', label: '리포트', icon: FileText }
             ].map(tab => (
@@ -748,63 +774,135 @@ const AdminDashboard = ({ onClose }) => {
           </div>
         )}
 
-        {activeTab === 'contracts' && (
+        {activeTab === 'workstats' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">계약 및 정산 관리</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">이번 달 정산</h3>
-                <p className="text-3xl font-bold text-blue-600 mb-2">₩{(stats.monthlyRevenue / 10000).toFixed(0)}만</p>
-                <p className="text-sm text-gray-600">정산 완료: 20개사</p>
-              </div>
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">미수금</h3>
-                <p className="text-3xl font-bold text-red-600 mb-2">₩320만</p>
-                <p className="text-sm text-gray-600">4개사 미납</p>
-              </div>
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">계약 현황</h3>
-                <p className="text-3xl font-bold text-duru-orange-600 mb-2">{stats.expiringContracts}건</p>
-                <p className="text-sm text-gray-600">3개월 내 만료</p>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <BarChart3 className="w-7 h-7 text-duru-orange-600" />
+                근무 통계
+              </h2>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-duru-orange-600" />
+                  <input
+                    type="month"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="px-4 py-2 border-2 border-duru-orange-500 rounded-lg bg-duru-orange-50 text-duru-orange-600 font-bold focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">회사별 정산 내역</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">회사명</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">근로자 수</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">정산 금액</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">정산 상태</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">문서</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {companies.map(company => (
-                      <tr key={company.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 font-semibold text-gray-900">{company.name}</td>
-                        <td className="px-6 py-4 text-gray-900">{company.workers}명</td>
-                        <td className="px-6 py-4 text-gray-900">₩{(company.revenue / 10000).toFixed(0)}만</td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                            완료
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <button className="text-duru-orange-600 hover:text-duru-orange-700 font-semibold text-sm flex items-center gap-2">
-                            <Download className="w-4 h-4" />
-                            세금계산서
+            <div className="space-y-4">
+              {Object.entries(monthlyWorkStats).map(([companyName, companyWorkers]) => {
+                const totalEmployees = companyWorkers.length;
+                const avgWorkHours = (companyWorkers.reduce((sum, w) => sum + w.totalHours, 0) / totalEmployees).toFixed(1);
+                const avgWorkDays = (companyWorkers.reduce((sum, w) => sum + w.workDays, 0) / totalEmployees).toFixed(1);
+                const isExpanded = expandedCompanies[companyName];
+
+                return (
+                  <div key={companyName} className="bg-white rounded-xl border border-gray-200 overflow-hidden print:break-inside-avoid">
+                    <button
+                      onClick={() => toggleCompany(companyName)}
+                      className="w-full bg-gradient-to-r from-duru-orange-50 to-white px-6 py-5 border-b border-gray-200 hover:from-duru-orange-100 hover:to-duru-orange-50 transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-white rounded-lg shadow-sm">
+                            {isExpanded ? (
+                              <ChevronDown className="w-5 h-5 text-duru-orange-600" />
+                            ) : (
+                              <ChevronRight className="w-5 h-5 text-duru-orange-600" />
+                            )}
+                          </div>
+                          <div className="text-left">
+                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-1">
+                              <Building2 className="w-5 h-5 text-duru-orange-600" />
+                              {companyName}
+                            </h3>
+                            <p className="text-sm text-gray-600">전체 {totalEmployees}명</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePrint(companyName);
+                            }}
+                            className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-2 print:hidden"
+                          >
+                            <Printer className="w-4 h-4" />
+                            인쇄
                           </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        </div>
+                      </div>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="p-6">
+                        <div className="mb-6 print:block hidden">
+                          <h2 className="text-2xl font-bold text-center mb-2">{companyName} 월 근무 통계</h2>
+                          <p className="text-center text-gray-600">{selectedMonth.split('-')[0]}년 {selectedMonth.split('-')[1]}월</p>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse">
+                            <thead className="bg-duru-orange-50">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">이름</th>
+                                <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">부서</th>
+                                <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">출근 일수</th>
+                                <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">총 근무시간</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {companyWorkers.map((worker, index) => (
+                                <tr key={worker.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                  <td className="px-4 py-3 font-semibold text-gray-900 border border-gray-300">{worker.name}</td>
+                                  <td className="px-4 py-3 text-gray-700 border border-gray-300">{worker.department}</td>
+                                  <td className="px-4 py-3 text-center text-gray-900 border border-gray-300">{worker.workDays}일</td>
+                                  <td className="px-4 py-3 text-center font-bold text-blue-600 border border-gray-300">{worker.totalHours}h</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot className="bg-duru-orange-100 border-t-2 border-duru-orange-500">
+                              <tr>
+                                <td colSpan="2" className="px-4 py-3 font-bold text-gray-900 border border-gray-300">평균</td>
+                                <td className="px-4 py-3 text-center font-bold text-gray-900 border border-gray-300">
+                                  {avgWorkDays}일
+                                </td>
+                                <td className="px-4 py-3 text-center font-bold text-blue-600 border border-gray-300">
+                                  {avgWorkHours}h
+                                </td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                        <div className="mt-8 pt-6 border-t-2 border-gray-300 print:block hidden">
+                          <div className="grid grid-cols-2 gap-8 mb-6">
+                            <div>
+                              <p className="text-sm text-gray-600 mb-2">기업 (대표자)</p>
+                              <div className="border-2 border-gray-300 rounded-lg p-6 h-24 flex items-center justify-center">
+                                <p className="text-gray-400">(서명/인)</p>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-600 mb-2">두루빛터 (담당자)</p>
+                              <div className="border-2 border-gray-300 rounded-lg p-6 h-24 flex items-center justify-center">
+                                <p className="text-gray-400">(서명/인)</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex justify-between text-sm text-gray-600 mt-4">
+                            <div>발급일: {new Date().toLocaleDateString('ko-KR')}</div>
+                            <div>두루빛터 중앙 통제 시스템</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
