@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Users, UserCheck, UserX, Clock, Calendar, TrendingUp, FileText, Search, ChevronLeft, ChevronRight, Download, Upload, Eye, X, Plus, Check, CheckCircle2, Hash, Lock, ChevronDown, Phone, Shield, Heart, Briefcase } from 'lucide-react';
+import { ArrowLeft, Users, UserCheck, UserX, Clock, Calendar, TrendingUp, FileText, Search, ChevronLeft, ChevronRight, Download, Upload, Eye, X, Plus, Check, CheckCircle2, Hash, Lock, ChevronDown, Phone, Shield, Heart, Briefcase, Bell, AlertCircle, User } from 'lucide-react';
 import EmployeeDetail from './EmployeeDetail';
 
 const CompanyDashboard = ({ onClose }) => {
-  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, employees, attendance, stats
+  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, employees, attendance, notices
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date(2026, 0, 1)); // 2026년 1월
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 0, 28)); // 2026년 1월 28일
@@ -182,7 +182,7 @@ const CompanyDashboard = ({ onClose }) => {
               { id: 'dashboard', label: '대시보드', icon: TrendingUp },
               { id: 'employees', label: '근로자 관리', icon: Users },
               { id: 'attendance', label: '근무일정관리', icon: Clock },
-              { id: 'stats', label: '통계', icon: Calendar }
+              { id: 'notices', label: '공지사항', icon: Bell }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -581,11 +581,126 @@ const CompanyDashboard = ({ onClose }) => {
           </div>
         )}
 
-        {activeTab === 'stats' && (
-          <div className="bg-white rounded-xl p-8 border border-gray-200 text-center">
-            <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">통계 및 리포트</h3>
-            <p className="text-gray-600">월별/주별 출근율과 근무시간 통계를 확인할 수 있습니다.</p>
+        {activeTab === 'notices' && (
+          <div className="space-y-6">
+            {/* 공지사항 헤더 */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">공지사항</h2>
+            </div>
+
+            {/* 공지사항 리스트 */}
+            <div className="space-y-3">
+              {/* 공지사항 카드 1 - 긴급 */}
+              <div className="bg-white rounded-xl border border-red-200 overflow-hidden hover:shadow-soft transition-all">
+                <div className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <AlertCircle className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="px-2.5 py-0.5 bg-red-500 text-white text-xs font-semibold rounded">긴급</span>
+                        <span className="text-sm text-gray-500">2026.02.02 14:30</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">폭설로 인한 출근 제한 안내</h3>
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">폭설로 인해 금일 출근이 제한됩니다.
+안전을 위해 자택 대기 바랍니다.</p>
+                      <div className="pt-4 border-t border-gray-100">
+                        <span className="text-sm text-gray-500">두루빛 관리자</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 공지사항 카드 2 - 일반 */}
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-soft transition-all">
+                <div className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Bell className="w-5 h-5 text-gray-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm text-gray-500">2026.01.28 09:15</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">2월 급여 지급 일정 안내</h3>
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">2월 급여는 2월 25일에 지급 예정입니다.
+급여 관련 문의사항은 관리자에게 연락 바랍니다.</p>
+                      <div className="pt-4 border-t border-gray-100">
+                        <span className="text-sm text-gray-500">두루빛 관리자</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 공지사항 카드 3 - 일반 */}
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-soft transition-all">
+                <div className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-5 h-5 text-gray-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm text-gray-500">2026.01.20 10:00</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">설 연휴 근무 일정 변경 안내</h3>
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">설 연휴 기간(2월 9일~11일) 근무 일정이 조정되었습니다.
+자세한 사항은 각 부서 담당자에게 문의하시기 바랍니다.</p>
+                      <div className="pt-4 border-t border-gray-100">
+                        <span className="text-sm text-gray-500">두루빛 관리자</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 공지사항 카드 4 - 일반 */}
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-soft transition-all">
+                <div className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-5 h-5 text-gray-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm text-gray-500">2026.01.15 14:20</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">1월 근무 우수 기업 선정</h3>
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">(주)두루빛 제조가 1월 근무 우수 기업으로 선정되었습니다.
+출근율 100% 달성을 축하드립니다!</p>
+                      <div className="pt-4 border-t border-gray-100">
+                        <span className="text-sm text-gray-500">두루빛 관리자</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 공지사항 카드 5 - 일반 */}
+              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-soft transition-all">
+                <div className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-5 h-5 text-gray-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm text-gray-500">2026.01.10 11:30</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">정기 안전 교육 실시 안내</h3>
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">1월 30일 오후 2시 정기 안전 교육이 실시됩니다.
+전 근로자 필수 참석 바랍니다.</p>
+                      <div className="pt-4 border-t border-gray-100">
+                        <span className="text-sm text-gray-500">두루빛 관리자</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
