@@ -14,6 +14,7 @@ const AdminDashboard = ({ onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [workStatsSearchQuery, setWorkStatsSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 0, 28)); // 2026-01-28
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState({}); // 회사별 오전/오후 선택
   const [printPreview, setPrintPreview] = useState(null); // {companyName, workers}
   const [editingPreviewCell, setEditingPreviewCell] = useState(null); // {workerId, field}
   const [previewEditValue, setPreviewEditValue] = useState('');
@@ -87,25 +88,46 @@ const AdminDashboard = ({ onClose }) => {
     { id: 4, type: 'payment', title: '한빛포장 1월 정산 완료', message: '정산 금액: ₩5,400,000', priority: 'low', date: '2026-01-25' },
   ];
 
-  // 오늘 날짜 출퇴근 데이터 (회사별로 그룹화)
+  // 오늘 날짜 출퇴근 데이터 (회사별, 시간대별로 그룹화)
   const [dailyAttendance, setDailyAttendance] = useState({
-    '(주)두루빛 제조': [
-      { id: 1, name: '김민수', department: '제조부', checkin: '09:00', checkout: '-', workContent: '', needsAttention: false },
-      { id: 2, name: '이영희', department: '포장부', checkin: '09:05', checkout: '-', workContent: '', needsAttention: false },
-      { id: 7, name: '김수진', department: '제조부', checkin: '09:00', checkout: '-', workContent: '', needsAttention: false },
-    ],
-    '세종식품': [
-      { id: 3, name: '박철수', department: '생산부', checkin: '09:00', checkout: '-', workContent: '', needsAttention: false },
-      { id: 8, name: '이민호', department: '생산부', checkin: '-', checkout: '-', workContent: '', needsAttention: true },
-    ],
-    '한빛포장': [
-      { id: 4, name: '정미라', department: '품질관리', checkin: '09:10', checkout: '-', workContent: '', needsAttention: true },
-      { id: 9, name: '박지영', department: '포장부', checkin: '09:00', checkout: '-', workContent: '', needsAttention: false },
-    ],
-    '그린팜': [
-      { id: 5, name: '최동욱', department: '재배', checkin: '-', checkout: '-', workContent: '', needsAttention: true },
-      { id: 10, name: '강태민', department: '재배', checkin: '09:00', checkout: '-', workContent: '', needsAttention: false },
-    ],
+    '(주)두루빛 제조': {
+      morning: [
+        { id: 1, name: '김민수', department: '제조부', checkin: '09:00', checkout: '-', workContent: '', needsAttention: false },
+        { id: 2, name: '이영희', department: '포장부', checkin: '09:05', checkout: '-', workContent: '', needsAttention: false },
+      ],
+      afternoon: [
+        { id: 7, name: '김수진', department: '제조부', checkin: '14:00', checkout: '-', workContent: '', needsAttention: false },
+        { id: 11, name: '박서준', department: '포장부', checkin: '14:05', checkout: '-', workContent: '', needsAttention: false },
+      ]
+    },
+    '세종식품': {
+      morning: [
+        { id: 3, name: '박철수', department: '생산부', checkin: '09:00', checkout: '-', workContent: '', needsAttention: false },
+        { id: 8, name: '이민호', department: '생산부', checkin: '-', checkout: '-', workContent: '', needsAttention: true },
+      ],
+      afternoon: [
+        { id: 12, name: '최민지', department: '생산부', checkin: '13:00', checkout: '-', workContent: '', needsAttention: false },
+      ]
+    },
+    '한빛포장': {
+      morning: [
+        { id: 4, name: '정미라', department: '품질관리', checkin: '09:10', checkout: '-', workContent: '', needsAttention: true },
+        { id: 9, name: '박지영', department: '포장부', checkin: '09:00', checkout: '-', workContent: '', needsAttention: false },
+      ],
+      afternoon: [
+        { id: 13, name: '이준호', department: '포장부', checkin: '14:00', checkout: '-', workContent: '', needsAttention: false },
+        { id: 14, name: '김하은', department: '품질관리', checkin: '14:10', checkout: '-', workContent: '', needsAttention: false },
+      ]
+    },
+    '그린팜': {
+      morning: [
+        { id: 5, name: '최동욱', department: '재배', checkin: '-', checkout: '-', workContent: '', needsAttention: true },
+        { id: 10, name: '강태민', department: '재배', checkin: '09:00', checkout: '-', workContent: '', needsAttention: false },
+      ],
+      afternoon: [
+        { id: 15, name: '윤서아', department: '재배', checkin: '13:30', checkout: '-', workContent: '', needsAttention: false },
+      ]
+    },
   });
 
   const startEdit = (companyName, workerId, field, currentValue) => {
@@ -113,12 +135,15 @@ const AdminDashboard = ({ onClose }) => {
     setEditValue(currentValue);
   };
 
-  const saveEdit = (companyName, workerId, field) => {
+  const saveEdit = (companyName, workerId, field, timeSlot) => {
     setDailyAttendance(prev => ({
       ...prev,
-      [companyName]: prev[companyName].map(worker =>
-        worker.id === workerId ? { ...worker, [field]: editValue, needsAttention: false } : worker
-      )
+      [companyName]: {
+        ...prev[companyName],
+        [timeSlot]: prev[companyName][timeSlot].map(worker =>
+          worker.id === workerId ? { ...worker, [field]: editValue, needsAttention: false } : worker
+        )
+      }
     }));
     setEditingCell(null);
     setEditValue('');
@@ -479,7 +504,11 @@ const AdminDashboard = ({ onClose }) => {
               </div>
 
               {/* 회사별 아코디언 */}
-              {filteredCompanies.map(([companyName, companyWorkers]) => {
+              {filteredCompanies.map(([companyName, companyData]) => {
+                // 선택된 시간대 (기본값: morning)
+                const currentTimeSlot = selectedTimeSlot[companyName] || 'morning';
+                const companyWorkers = companyData[currentTimeSlot];
+
                 const statusCounts = companyWorkers.reduce((acc, w) => {
                   const status = getAttendanceStatus(w);
                   acc[status] = (acc[status] || 0) + 1;
@@ -487,6 +516,10 @@ const AdminDashboard = ({ onClose }) => {
                 }, {});
 
                 const isExpanded = expandedCompanies[companyName];
+
+                // 전체 근로자 수 (오전 + 오후)
+                const totalWorkers = companyData.morning.length + companyData.afternoon.length;
+                const totalCheckedIn = [...companyData.morning, ...companyData.afternoon].filter(w => w.checkin !== '-').length;
 
                 return (
                 <div key={companyName} className="bg-white rounded-xl border border-gray-200">
@@ -507,9 +540,35 @@ const AdminDashboard = ({ onClose }) => {
                           <Building2 className="w-5 h-5 text-duru-orange-600" />
                           {companyName}
                           <span className="text-sm font-normal text-gray-600 ml-2">
-                            ({companyWorkers.filter(w => w.checkin !== '-').length}/{companyWorkers.length}명 출근)
+                            ({totalCheckedIn}/{totalWorkers}명 출근)
                           </span>
                         </h3>
+                        {/* 오전/오후 토글 버튼 */}
+                        <div
+                          className="flex items-center bg-white border-2 border-duru-orange-200 rounded-lg overflow-hidden ml-3"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            onClick={() => setSelectedTimeSlot(prev => ({ ...prev, [companyName]: 'morning' }))}
+                            className={`px-4 py-1.5 text-sm font-semibold transition-all ${
+                              currentTimeSlot === 'morning'
+                                ? 'bg-duru-orange-500 text-white'
+                                : 'bg-white text-gray-600 hover:bg-duru-orange-50'
+                            }`}
+                          >
+                            오전 ({companyData.morning.length}명)
+                          </button>
+                          <button
+                            onClick={() => setSelectedTimeSlot(prev => ({ ...prev, [companyName]: 'afternoon' }))}
+                            className={`px-4 py-1.5 text-sm font-semibold transition-all ${
+                              currentTimeSlot === 'afternoon'
+                                ? 'bg-duru-orange-500 text-white'
+                                : 'bg-white text-gray-600 hover:bg-duru-orange-50'
+                            }`}
+                          >
+                            오후 ({companyData.afternoon.length}명)
+                          </button>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {Object.entries(statusCounts).map(([status, count]) => (
@@ -569,7 +628,7 @@ const AdminDashboard = ({ onClose }) => {
                                     autoFocus
                                   />
                                   <button
-                                    onClick={() => saveEdit(companyName, worker.id, 'checkin')}
+                                    onClick={() => saveEdit(companyName, worker.id, 'checkin', currentTimeSlot)}
                                     className="p-1 hover:bg-green-100 rounded"
                                   >
                                     <Check className="w-4 h-4 text-green-600" />
@@ -604,7 +663,7 @@ const AdminDashboard = ({ onClose }) => {
                                     autoFocus
                                   />
                                   <button
-                                    onClick={() => saveEdit(companyName, worker.id, 'checkout')}
+                                    onClick={() => saveEdit(companyName, worker.id, 'checkout', currentTimeSlot)}
                                     className="p-1 hover:bg-green-100 rounded"
                                   >
                                     <Check className="w-4 h-4 text-green-600" />
@@ -640,7 +699,7 @@ const AdminDashboard = ({ onClose }) => {
                                     autoFocus
                                   />
                                   <button
-                                    onClick={() => saveEdit(companyName, worker.id, 'workContent')}
+                                    onClick={() => saveEdit(companyName, worker.id, 'workContent', currentTimeSlot)}
                                     className="p-1 hover:bg-green-100 rounded flex-shrink-0"
                                   >
                                     <Check className="w-4 h-4 text-green-600" />
