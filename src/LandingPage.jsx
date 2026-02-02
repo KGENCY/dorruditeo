@@ -9,11 +9,12 @@ import {
   MapPin,
   Smartphone,
   CalendarCheck,
-  Calculator
+  Calculator,
+  Shield
 } from 'lucide-react';
 import heroImage1 from './assets/스크린샷 2026-01-28 오후 2.06.47.png';
 import heroImage2 from './assets/스크린샷 2026-01-28 오후 2.07.26.png';
-import heroImage3 from './assets/스크린샷 2026-01-28 오후 5.38.39.png';
+import heroImage3 from './assets/장애인 의자.png';
 import AttendanceApp from './AttendanceApp';
 import CompanyDashboard from './CompanyDashboard';
 import AdminDashboard from './AdminDashboard';
@@ -57,19 +58,19 @@ const LandingPage = () => {
             <div className="text-3xl font-bold text-duru-orange-600">두루빛터</div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-lg font-semibold text-gray-600">
-            <a href="#" className="hover:text-duru-orange-600 transition-colors">기업 맞춤안내</a>
-            <a href="#" className="hover:text-duru-orange-600 transition-colors">채용정보</a>
-            <a href="#" className="hover:text-duru-orange-600 transition-colors">고객센터</a>
-          </nav>
-
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-8">
+            <nav className="hidden md:flex items-center gap-8 text-lg font-semibold text-gray-600">
+              <a href="#" className="hover:text-duru-orange-600 transition-colors">기업 맞춤안내</a>
+              <a href="#" className="hover:text-duru-orange-600 transition-colors">채용정보</a>
+              <a href="#" className="hover:text-duru-orange-600 transition-colors">고객센터</a>
+            </nav>
             <button
-              onClick={() => setShowAttendanceApp(true)}
-              className="text-base font-bold bg-duru-orange-500 text-white px-5 py-2.5 rounded hover:bg-duru-orange-600 transition-colors flex items-center gap-2 shadow-sm"
+              onClick={() => setShowAdminDashboard(true)}
+              className="text-sm font-medium text-gray-500 px-4 py-2 rounded border border-gray-200 hover:text-gray-700 hover:border-gray-300 transition-colors flex items-center gap-1.5"
             >
-              두루빛 출퇴근 바로가기
-              <ChevronRight className="w-4 h-4" />
+              <Shield className="w-3.5 h-3.5" />
+              관리자 페이지
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -82,7 +83,7 @@ const LandingPage = () => {
             <div className="flex items-center gap-3 mb-2">
               <span className="w-12 h-[2px] bg-duru-orange-500"></span>
               <span className="text-duru-orange-500 font-bold tracking-[0.2em] text-sm uppercase">
-                DURUBITTER : SHINING TOGETHER
+                DURUBITTEO : SHINING TOGETHER
               </span>
             </div>
 
@@ -98,17 +99,19 @@ const LandingPage = () => {
 
             <div className="flex flex-wrap gap-4 pt-4">
               <button
-                onClick={() => setShowAdminDashboard(true)}
+                onClick={() => setShowAttendanceApp(true)}
                 className="px-8 py-4 bg-duru-orange-500 text-white rounded font-medium text-lg hover:bg-duru-orange-600 transition-colors shadow-soft flex items-center gap-2"
               >
-                일자리 찾기
+                <Clock className="w-5 h-5" />
+                출퇴근 하기
                 <ChevronRight className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setShowCompanyDashboard(true)}
-                className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded font-medium text-lg hover:bg-gray-50 transition-colors shadow-sm"
+                className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded font-medium text-lg hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2"
               >
-                기업 채용 문의
+                <Building2 className="w-5 h-5" />
+                기업 관리자 페이지
               </button>
             </div>
           </div>
@@ -136,8 +139,8 @@ const LandingPage = () => {
                 <button
                   key={idx}
                   onClick={() => setCurrentImageIdx(idx)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    idx === currentImageIdx ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/80'
+                  className={`h-2 rounded-full transition-all ${
+                    idx === currentImageIdx ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
