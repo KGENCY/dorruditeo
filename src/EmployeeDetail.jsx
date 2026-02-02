@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, User, Briefcase, Phone, Mail, MapPin, FileText, Upload, Download, Eye, X, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, User, Briefcase, Phone, Mail, MapPin, FileText, Upload, Download, Eye, X, Calendar, Clock, Shield, Hash, IdCard, Heart, Users as UserIcon, Edit2, Check } from 'lucide-react';
 
 const EmployeeDetail = ({ employee, onClose }) => {
   const [documents, setDocuments] = useState([
@@ -10,6 +10,13 @@ const EmployeeDetail = ({ employee, onClose }) => {
 
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+
+  // 근무 정보
+  const [workDays, setWorkDays] = useState(['월', '화', '수', '목', '금']);
+  const [workStartTime, setWorkStartTime] = useState('09:00');
+  const [isEditingWorkInfo, setIsEditingWorkInfo] = useState(false);
+  const [tempWorkDays, setTempWorkDays] = useState([]);
+  const [tempWorkStartTime, setTempWorkStartTime] = useState('');
 
   const attendanceHistory = [
     { date: '2026-01-28', checkin: '09:00', checkout: '18:00', status: '정상', workDone: '제품 검수 완료' },
@@ -32,6 +39,32 @@ const EmployeeDetail = ({ employee, onClose }) => {
       setDocuments([...documents, newDoc]);
       setShowUploadModal(false);
       setSelectedFile(null);
+    }
+  };
+
+  const handleEditWorkInfo = () => {
+    setTempWorkDays([...workDays]);
+    setTempWorkStartTime(workStartTime);
+    setIsEditingWorkInfo(true);
+  };
+
+  const handleSaveWorkInfo = () => {
+    setWorkDays([...tempWorkDays]);
+    setWorkStartTime(tempWorkStartTime);
+    setIsEditingWorkInfo(false);
+  };
+
+  const handleCancelEditWorkInfo = () => {
+    setIsEditingWorkInfo(false);
+    setTempWorkDays([]);
+    setTempWorkStartTime('');
+  };
+
+  const toggleTempWorkDay = (day) => {
+    if (tempWorkDays.includes(day)) {
+      setTempWorkDays(tempWorkDays.filter(d => d !== day));
+    } else {
+      setTempWorkDays([...tempWorkDays, day]);
     }
   };
 
@@ -77,19 +110,24 @@ const EmployeeDetail = ({ employee, onClose }) => {
 
               <div className="space-y-3 border-t border-gray-200 pt-6">
                 <div className="flex items-center gap-3 text-sm">
+                  <IdCard className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600">주민번호:</span>
+                  <span className="font-semibold text-gray-900">123456-1234567</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
                   <Phone className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">전화번호:</span>
+                  <span className="text-gray-600">핸드폰번호:</span>
                   <span className="font-semibold text-gray-900">010-1234-5678</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <Mail className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">이메일:</span>
-                  <span className="font-semibold text-gray-900">employee@company.com</span>
+                  <Heart className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600">비상연락처:</span>
+                  <span className="font-semibold text-gray-900">010-9876-5432 (부모)</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">주소:</span>
-                  <span className="font-semibold text-gray-900">서울시 강남구</span>
+                  <UserIcon className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600">성별:</span>
+                  <span className="font-semibold text-gray-900">남</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Briefcase className="w-4 h-4 text-gray-400" />
@@ -99,28 +137,39 @@ const EmployeeDetail = ({ employee, onClose }) => {
               </div>
             </div>
 
-            {/* 이번 달 통계 */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
+            {/* 근로자 고유번호 */}
+            <div className="bg-duru-orange-50 rounded-xl p-6 border border-duru-orange-200">
               <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-duru-orange-600" />
-                이번 달 통계
+                <Hash className="w-5 h-5 text-duru-orange-600" />
+                근로자 고유번호
               </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-duru-orange-50 rounded-lg p-3">
-                  <p className="text-xs text-gray-600 mb-1">출근일</p>
-                  <p className="text-2xl font-bold text-duru-orange-600">20일</p>
+              <div className="bg-white rounded-lg p-4 border border-duru-orange-300">
+                <p className="text-2xl font-bold text-duru-orange-600 text-center tracking-wider">
+                  WK-2025-001
+                </p>
+              </div>
+            </div>
+
+            {/* 장애 정보 */}
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <Shield className="w-4 h-4 text-duru-orange-600" />
+                장애 정보
+              </h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-600">유형 및 등급</span>
+                  <span className="font-bold text-gray-900">지체장애 3급</span>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-xs text-gray-600 mb-1">결근</p>
-                  <p className="text-2xl font-bold text-gray-900">0일</p>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-600">중증/경증</span>
+                  <span className="inline-block px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                    경증
+                  </span>
                 </div>
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="text-xs text-gray-600 mb-1">휴가</p>
-                  <p className="text-2xl font-bold text-blue-600">1일</p>
-                </div>
-                <div className="bg-green-50 rounded-lg p-3">
-                  <p className="text-xs text-gray-600 mb-1">출근율</p>
-                  <p className="text-2xl font-bold text-green-600">100%</p>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-600">인정일</span>
+                  <span className="font-bold text-gray-900">2020-03-15</span>
                 </div>
               </div>
             </div>
@@ -167,6 +216,121 @@ const EmployeeDetail = ({ employee, onClose }) => {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* 근무 정보 */}
+            <div className="bg-white rounded-xl p-5 border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-duru-orange-600" />
+                  근무 정보
+                </h3>
+                {!isEditingWorkInfo ? (
+                  <button
+                    onClick={handleEditWorkInfo}
+                    className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors flex items-center gap-1.5"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    수정
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCancelEditWorkInfo}
+                      className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      취소
+                    </button>
+                    <button
+                      onClick={handleSaveWorkInfo}
+                      className="px-3 py-1.5 bg-duru-orange-500 text-white rounded-lg text-sm font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-1.5"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      저장
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {!isEditingWorkInfo ? (
+                <div className="flex items-center gap-4">
+                  {/* 근무 요일 */}
+                  <div className="flex-1">
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      근무 요일
+                    </label>
+                    <div className="flex gap-1">
+                      {['월', '화', '수', '목', '금', '토', '일'].map((day) => (
+                        <div
+                          key={day}
+                          className={`flex-1 py-1 rounded text-xs font-semibold text-center border ${
+                            workDays.includes(day)
+                              ? 'bg-duru-orange-500 text-white border-duru-orange-500'
+                              : 'bg-gray-50 text-gray-400 border-gray-200'
+                          }`}
+                        >
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 출근 시간 */}
+                  <div className="w-32">
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      출근 시간
+                    </label>
+                    <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-lg border border-gray-200">
+                      <Clock className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-sm font-bold text-gray-900">{workStartTime}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  {/* 근무 요일 */}
+                  <div className="flex-1">
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      근무 요일
+                    </label>
+                    <div className="grid grid-cols-7 gap-1">
+                      {['월', '화', '수', '목', '금', '토', '일'].map((day) => {
+                        const isSelected = tempWorkDays.includes(day);
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => toggleTempWorkDay(day)}
+                            className={`py-1 rounded text-xs font-semibold transition-colors border ${
+                              isSelected
+                                ? 'bg-duru-orange-500 text-white border-duru-orange-500'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 출근 시간 */}
+                  <div className="w-32">
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      출근 시간
+                    </label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                      <input
+                        type="time"
+                        value={tempWorkStartTime}
+                        onChange={(e) => setTempWorkStartTime(e.target.value)}
+                        className="w-full pl-9 pr-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent text-gray-700"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 출퇴근 기록 */}
