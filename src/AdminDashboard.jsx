@@ -122,11 +122,9 @@ const AdminDashboard = ({ onClose }) => {
   ];
 
   const absenceAlerts = [
-    { id: 1, name: '최동욱', company: '그린팜', date: '2026-01-26', status: '결근', detail: '3일 연속 결근, 연락 필요' },
-    { id: 2, name: '김민수', company: '(주)두루빛 제조', date: '2026-01-30', status: '미확인', detail: '금일 출근 미확인, 보호자 연락 시도 중' },
-    { id: 3, name: '정미라', company: '한빛포장', date: '2026-01-31', status: '결근', detail: '무단 결근, 사유 미확인' },
-    { id: 4, name: '이영희', company: '(주)두루빛 제조', date: '2026-01-31', status: '미확인', detail: '오전 출근 미확인, 전일 조퇴 이력 있음' },
-    { id: 5, name: '박철수', company: '세종식품', date: '2026-02-01', status: '결근', detail: '병가 신청 없이 결근, 확인 필요' },
+    { id: 1, name: '최동욱', company: '그린팜', date: '2026-01-26', status: '결근' },
+    { id: 3, name: '정미라', company: '한빛포장', date: '2026-01-31', status: '결근' },
+    { id: 5, name: '박철수', company: '세종식품', date: '2026-02-01', status: '결근' },
   ];
 
 
@@ -1155,7 +1153,6 @@ const AdminDashboard = ({ onClose }) => {
                           </span>
                         </div>
                         <p className="text-sm text-gray-500">{alert.company} · {alert.date}</p>
-                        <p className="text-sm text-gray-400 mt-0.5 line-clamp-2">{alert.detail}</p>
                       </div>
                       <button
                         onClick={() => {
