@@ -1157,7 +1157,15 @@ const AdminDashboard = ({ onClose }) => {
                         <p className="text-sm text-gray-500">{alert.company} · {alert.date}</p>
                         <p className="text-sm text-gray-400 mt-0.5 line-clamp-2">{alert.detail}</p>
                       </div>
-                      <button className="px-4 py-2 rounded-lg border border-duru-orange-300 bg-duru-orange-50 text-duru-orange-600 hover:bg-duru-orange-100 text-sm font-semibold whitespace-nowrap transition-colors">
+                      <button
+                        onClick={() => {
+                          if (alert.name === '최동욱') {
+                            const worker = workers.find(w => w.name === '최동욱');
+                            if (worker) setSelectedWorker({...worker, position: worker.department, hireDate: worker.contractEnd.substring(0, 10), contractStart: '2025-06-01'});
+                          }
+                        }}
+                        className="px-4 py-2 rounded-lg border border-duru-orange-300 bg-duru-orange-50 text-duru-orange-600 hover:bg-duru-orange-100 text-sm font-semibold whitespace-nowrap transition-colors"
+                      >
                         확인하기
                       </button>
                     </div>
