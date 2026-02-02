@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Building2, Phone, Mail, MapPin, User, Calendar, DollarSign, Users, FileText, TrendingUp, Clock, Edit3, Save, X } from 'lucide-react';
+import { ArrowLeft, Building2, Phone, Mail, MapPin, User, Calendar, DollarSign, Users, FileText, TrendingUp, Clock, Edit3, Save, X, Upload, Download, Trash2, Paperclip, Eye, Hash } from 'lucide-react';
 
 const CompanyDetail = ({ company, onClose }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -17,9 +17,10 @@ const CompanyDetail = ({ company, onClose }) => {
     { id: 4, name: '정수진', position: '사무보조', hireDate: '2025-09-01', status: '근무중', disability: '지적장애' },
   ];
 
-  const monthlyData = [
-    { month: '2025-12', workers: 4, attendance: 98.5, revenue: 12500000 },
-    { month: '2026-01', workers: 4, attendance: 97.8, revenue: 12800000 },
+  const uploadedFiles = [
+    { id: 1, name: '두루빛터_위탁계약서_2025.pdf', uploadDate: '2025-06-01', size: '2.4 MB' },
+    { id: 2, name: '개인정보처리위탁_동의서.pdf', uploadDate: '2025-06-01', size: '1.1 MB' },
+    { id: 3, name: '근로자_배치계획서_2026.pdf', uploadDate: '2026-01-10', size: '850 KB' },
   ];
 
   const contracts = [
@@ -135,10 +136,22 @@ const CompanyDetail = ({ company, onClose }) => {
                     )}
                   </div>
                 </div>
+                {/* 구분선 */}
+                <div className="border-t border-gray-200 my-3"></div>
+
                 <div className="flex items-center gap-3 text-sm">
                   <Calendar className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-600">계약 시작:</span>
-                  <span className="font-semibold text-gray-900">{company.joinDate || '2025-06-01'}</span>
+                  <div className="flex-1">
+                    <span className="text-gray-600 block">계약 시작일:</span>
+                    <span className="font-semibold text-gray-900">{company.joinDate || '2025-06-01'}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <Hash className="w-4 h-4 text-gray-400" />
+                  <div className="flex-1">
+                    <span className="text-gray-600 block">기업 고유 번호:</span>
+                    <span className="font-semibold text-gray-900 font-mono tracking-wide">{company.adminId || 'DRT-2025-0001'}</span>
+                  </div>
                 </div>
               </div>
 
@@ -242,29 +255,46 @@ const CompanyDetail = ({ company, onClose }) => {
               </div>
             </div>
 
-            {/* 월별 실적 */}
+            {/* 계약서 및 첨부 파일 */}
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-duru-orange-600" />
-                월별 실적
-              </h3>
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Paperclip className="w-5 h-5 text-duru-orange-600" />
+                  계약서 및 첨부 파일
+                </h3>
+                <p className="text-xs text-gray-500 mt-1 ml-7">해당 기업과 관련된 계약서 및 내부 자료를 관리합니다</p>
+              </div>
 
-              <div className="space-y-4">
-                {monthlyData.map((data, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-lg p-4 hover:border-duru-orange-300 transition-colors">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-bold text-gray-900">{data.month}</h4>
-                      <span className="text-sm text-gray-500">{data.workers}명 근무</span>
+              {/* 업로드 영역 */}
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-duru-orange-400 transition-colors cursor-pointer mb-6">
+                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                <p className="text-sm text-gray-600 mb-3">PDF 파일을 드래그하거나 클릭하여 업로드</p>
+                <button className="px-4 py-2 bg-duru-orange-500 text-white text-sm font-semibold rounded-lg hover:bg-duru-orange-600 transition-colors">
+                  파일 선택
+                </button>
+              </div>
+
+              {/* 업로드된 파일 리스트 */}
+              <div className="space-y-2">
+                {uploadedFiles.map((file) => (
+                  <div key={file.id} className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                    <div className="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-4 h-4 text-red-600" />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs text-gray-600 mb-1">출근율</p>
-                        <p className="text-lg font-bold text-green-600">{data.attendance}%</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-600 mb-1">정산 금액</p>
-                        <p className="text-lg font-bold text-blue-600">{data.revenue.toLocaleString()}원</p>
-                      </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
+                      <p className="text-xs text-gray-500">{file.uploadDate} · {file.size}</p>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button className="p-2 hover:bg-white rounded-lg transition-colors" title="보기">
+                        <Eye className="w-4 h-4 text-gray-500" />
+                      </button>
+                      <button className="p-2 hover:bg-white rounded-lg transition-colors" title="다운로드">
+                        <Download className="w-4 h-4 text-gray-500" />
+                      </button>
+                      <button className="p-2 hover:bg-white rounded-lg transition-colors" title="삭제">
+                        <Trash2 className="w-4 h-4 text-gray-400" />
+                      </button>
                     </div>
                   </div>
                 ))}

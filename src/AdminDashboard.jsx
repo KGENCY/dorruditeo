@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Users, Building2, TrendingUp, AlertCircle, DollarSign, FileText, Search, Bell, Calendar, UserCheck, Clock, ChevronRight, Edit, Eye, Download, Upload, MessageSquare, Filter, Save, X, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Users, Building2, TrendingUp, AlertCircle, DollarSign, FileText, Search, Bell, Calendar, UserCheck, Clock, ChevronRight, Edit, Eye, Download, Upload, MessageSquare, Filter, Save, X, Check, ChevronDown, ChevronUp, Lock, CheckCircle2, Mail, Phone, MapPin, User } from 'lucide-react';
 import AdminWorkerDetail from './AdminWorkerDetail';
 import CompanyDetail from './CompanyDetail';
 
@@ -12,6 +12,39 @@ const AdminDashboard = ({ onClose }) => {
   const [expandedCompanies, setExpandedCompanies] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 0, 28)); // 2026-01-28
+  const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
+  const [addCompanyForm, setAddCompanyForm] = useState({
+    companyName: '',
+    businessNumber: '',
+    address: '',
+    contractStartDate: '',
+    contactName: '',
+    contactPhone: '',
+    contactEmail: '',
+    adminId: '',
+  });
+  const [addCompanyComplete, setAddCompanyComplete] = useState({});
+
+  const updateAddCompanyForm = (field, value) => {
+    const newForm = { ...addCompanyForm, [field]: value };
+    setAddCompanyForm(newForm);
+    const newComplete = { ...addCompanyComplete };
+    if (value.trim()) {
+      newComplete[field] = true;
+    } else {
+      delete newComplete[field];
+    }
+    setAddCompanyComplete(newComplete);
+  };
+
+  const handleAddCompanySubmit = () => {
+    const required = ['companyName', 'businessNumber', 'contractStartDate', 'contactName', 'contactPhone', 'adminId'];
+    const allFilled = required.every(f => addCompanyForm[f].trim());
+    if (!allFilled) return;
+    setShowAddCompanyModal(false);
+    setAddCompanyForm({ companyName: '', businessNumber: '', address: '', contractStartDate: '', contactName: '', contactPhone: '', contactEmail: '', adminId: '' });
+    setAddCompanyComplete({});
+  };
 
   // 더미 데이터
   const stats = {
@@ -604,7 +637,10 @@ const AdminDashboard = ({ onClose }) => {
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
                   />
                 </div>
-                <button className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors">
+                <button
+                  onClick={() => setShowAddCompanyModal(true)}
+                  className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors"
+                >
                   + 회원사 추가
                 </button>
               </div>
@@ -896,6 +932,220 @@ const AdminDashboard = ({ onClose }) => {
           </div>
         )}
       </div>
+      {/* 회원사 추가 모달 */}
+      {showAddCompanyModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowAddCompanyModal(false)} />
+          <div className="relative bg-white rounded-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto shadow-xl">
+            {/* 모달 헤더 */}
+            <div className="sticky top-0 bg-white rounded-t-2xl border-b border-gray-200 px-6 py-5 flex items-center justify-between z-10">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">회원사 추가</h2>
+                <p className="text-xs text-gray-500 mt-0.5">새로운 회원사 정보를 입력해주세요</p>
+              </div>
+              <button
+                onClick={() => setShowAddCompanyModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-5">
+              {/* 섹션 1: 회사 기본 정보 */}
+              <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-duru-orange-500" />
+                  회사 기본 정보
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      회사명 <span className="text-duru-orange-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="예: (주)두루빛 제조"
+                        value={addCompanyForm.companyName}
+                        onChange={(e) => updateAddCompanyForm('companyName', e.target.value)}
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                      />
+                      {addCompanyComplete.companyName && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      사업자등록번호 <span className="text-duru-orange-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="000-00-00000"
+                        value={addCompanyForm.businessNumber}
+                        onChange={(e) => updateAddCompanyForm('businessNumber', e.target.value)}
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                      />
+                      {addCompanyComplete.businessNumber && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      주소
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="사업장 주소 입력"
+                        value={addCompanyForm.address}
+                        onChange={(e) => updateAddCompanyForm('address', e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                      />
+                      {addCompanyComplete.address && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      계약 시작일 <span className="text-duru-orange-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="date"
+                        value={addCompanyForm.contractStartDate}
+                        onChange={(e) => updateAddCompanyForm('contractStartDate', e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent text-gray-700"
+                      />
+                      {addCompanyComplete.contractStartDate && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 섹션 2: 인사 담당자 정보 */}
+              <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <User className="w-4 h-4 text-duru-orange-500" />
+                  인사 담당자 정보
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      담당자명 <span className="text-duru-orange-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="담당자 이름"
+                        value={addCompanyForm.contactName}
+                        onChange={(e) => updateAddCompanyForm('contactName', e.target.value)}
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                      />
+                      {addCompanyComplete.contactName && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      연락처 <span className="text-duru-orange-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="tel"
+                        placeholder="010-0000-0000"
+                        value={addCompanyForm.contactPhone}
+                        onChange={(e) => updateAddCompanyForm('contactPhone', e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                      />
+                      {addCompanyComplete.contactPhone && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      이메일
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="email"
+                        placeholder="email@company.com"
+                        value={addCompanyForm.contactEmail}
+                        onChange={(e) => updateAddCompanyForm('contactEmail', e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                      />
+                      {addCompanyComplete.contactEmail && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 섹션 3: 기업 관리자 계정 설정 */}
+              <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-duru-orange-500" />
+                  기업 관리자 계정 설정
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      관리자 아이디 <span className="text-duru-orange-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="로그인에 사용할 아이디"
+                        value={addCompanyForm.adminId}
+                        onChange={(e) => updateAddCompanyForm('adminId', e.target.value)}
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                      />
+                      {addCompanyComplete.adminId && (
+                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 flex items-center gap-1.5 bg-white rounded-lg px-3 py-2 border border-gray-200">
+                    <Lock className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                    초기 비밀번호는 자동 생성되어 담당자 이메일로 발송됩니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 모달 푸터 */}
+            <div className="sticky bottom-0 bg-white rounded-b-2xl border-t border-gray-200 px-6 py-4 flex gap-3">
+              <button
+                onClick={() => setShowAddCompanyModal(false)}
+                className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-sm"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleAddCompanySubmit}
+                disabled={!['companyName', 'businessNumber', 'contractStartDate', 'contactName', 'contactPhone', 'adminId'].every(f => addCompanyForm[f].trim())}
+                className="flex-[2] py-3 bg-duru-orange-500 text-white rounded-xl font-semibold hover:bg-duru-orange-600 transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                회원사 추가 완료
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
