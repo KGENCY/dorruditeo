@@ -722,9 +722,6 @@ const AdminDashboard = ({ onClose }) => {
                 <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                   <Filter className="w-5 h-5 text-gray-600" />
                 </button>
-                <button className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors">
-                  + 근로자 추가
-                </button>
               </div>
             </div>
 
