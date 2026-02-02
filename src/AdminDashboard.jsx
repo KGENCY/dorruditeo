@@ -12,6 +12,7 @@ const AdminDashboard = ({ onClose }) => {
   const [editValue, setEditValue] = useState('');
   const [expandedCompanies, setExpandedCompanies] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [workStatsSearchQuery, setWorkStatsSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 0, 28)); // 2026-01-28
   const [printPreview, setPrintPreview] = useState(null); // {companyName, workers}
   const [editingPreviewCell, setEditingPreviewCell] = useState(null); // {workerId, field}
@@ -842,6 +843,16 @@ const AdminDashboard = ({ onClose }) => {
                 근무 통계
               </h2>
               <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="회사명 검색..."
+                    value={workStatsSearchQuery}
+                    onChange={(e) => setWorkStatsSearchQuery(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500 w-64"
+                  />
+                </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-duru-orange-600" />
                   <input
@@ -855,7 +866,11 @@ const AdminDashboard = ({ onClose }) => {
             </div>
 
             <div className="space-y-4">
-              {Object.entries(monthlyWorkStats).map(([companyName, companyWorkers]) => {
+              {Object.entries(monthlyWorkStats)
+                .filter(([companyName]) =>
+                  companyName.toLowerCase().includes(workStatsSearchQuery.toLowerCase())
+                )
+                .map(([companyName, companyWorkers]) => {
                 const totalEmployees = companyWorkers.length;
                 const avgWorkHours = (companyWorkers.reduce((sum, w) => sum + w.totalHours, 0) / totalEmployees).toFixed(1);
                 const avgWorkDays = (companyWorkers.reduce((sum, w) => sum + w.workDays, 0) / totalEmployees).toFixed(1);
