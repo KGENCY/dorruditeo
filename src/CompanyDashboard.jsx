@@ -10,10 +10,7 @@ const CompanyDashboard = ({ onClose }) => {
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(null); // 캘린더에서 선택한 날짜
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [scheduleForm, setScheduleForm] = useState({
-    workType: '',
-    startTime: '09:00',
-    endTime: '18:00',
-    workers: ''
+    workType: ''
   });
   const [showAddWorkerModal, setShowAddWorkerModal] = useState(false);
   const [addWorkerForm, setAddWorkerForm] = useState({
@@ -985,7 +982,7 @@ const CompanyDashboard = ({ onClose }) => {
               <button
                 onClick={() => {
                   setShowScheduleModal(false);
-                  setScheduleForm({ workType: '', startTime: '09:00', endTime: '18:00', workers: '' });
+                  setScheduleForm({ workType: '' });
                 }}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
@@ -1002,45 +999,12 @@ const CompanyDashboard = ({ onClose }) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">근무 내용</label>
-                <input
-                  type="text"
+                <textarea
                   value={scheduleForm.workType}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, workType: e.target.value })}
-                  placeholder="예: 제품 조립"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">시작 시간</label>
-                  <input
-                    type="time"
-                    value={scheduleForm.startTime}
-                    onChange={(e) => setScheduleForm({ ...scheduleForm, startTime: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">종료 시간</label>
-                  <input
-                    type="time"
-                    value={scheduleForm.endTime}
-                    onChange={(e) => setScheduleForm({ ...scheduleForm, endTime: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">투입 인원 (명)</label>
-                <input
-                  type="number"
-                  value={scheduleForm.workers}
-                  onChange={(e) => setScheduleForm({ ...scheduleForm, workers: e.target.value })}
-                  placeholder="예: 5"
-                  min="1"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                  placeholder="해당 날짜의 근무 내용을 입력하세요..."
+                  rows={8}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500 resize-none"
                 />
               </div>
             </div>
@@ -1049,7 +1013,7 @@ const CompanyDashboard = ({ onClose }) => {
               <button
                 onClick={() => {
                   setShowScheduleModal(false);
-                  setScheduleForm({ workType: '', startTime: '09:00', endTime: '18:00', workers: '' });
+                  setScheduleForm({ workType: '' });
                 }}
                 className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
               >
@@ -1060,9 +1024,9 @@ const CompanyDashboard = ({ onClose }) => {
                   // 실제로는 서버에 저장
                   console.log('일정 저장:', { date: selectedCalendarDate, ...scheduleForm });
                   setShowScheduleModal(false);
-                  setScheduleForm({ workType: '', startTime: '09:00', endTime: '18:00', workers: '' });
+                  setScheduleForm({ workType: '' });
                 }}
-                disabled={!scheduleForm.workType || !scheduleForm.workers}
+                disabled={!scheduleForm.workType.trim()}
                 className="flex-1 py-3 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 저장
