@@ -13,6 +13,9 @@ const AdminDashboard = ({ onClose }) => {
   const [expandedCompanies, setExpandedCompanies] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 0, 28)); // 2026-01-28
+  const [printPreview, setPrintPreview] = useState(null); // {companyName, workers}
+  const [editingPreviewCell, setEditingPreviewCell] = useState(null); // {workerId, field}
+  const [previewEditValue, setPreviewEditValue] = useState('');
 
   // 더미 데이터
   const stats = {
@@ -136,7 +139,7 @@ const AdminDashboard = ({ onClose }) => {
   );
 
   // 근무 통계 데이터 (월별 근무시간)
-  const monthlyWorkStats = {
+  const [monthlyWorkStats, setMonthlyWorkStats] = useState({
     '(주)두루빛 제조': [
       { id: 1, name: '김민수', department: '제조부', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
       { id: 2, name: '이영희', department: '포장부', totalHours: 168, avgHours: 7.6, workDays: 22, lateDays: 1 },
@@ -154,10 +157,34 @@ const AdminDashboard = ({ onClose }) => {
       { id: 5, name: '최동욱', department: '재배', totalHours: 140, avgHours: 6.4, workDays: 22, lateDays: 5 },
       { id: 10, name: '강태민', department: '재배', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
     ],
-  };
+  });
 
   const handlePrint = (companyName) => {
     window.print();
+  };
+
+  const startWorkStatsEdit = (companyName, workerId, field, currentValue) => {
+    setEditingPreviewCell({ companyName, workerId, field });
+    setPreviewEditValue(currentValue.toString());
+  };
+
+  const saveWorkStatsEdit = () => {
+    if (!editingPreviewCell) return;
+
+    const { companyName, workerId, field } = editingPreviewCell;
+    setMonthlyWorkStats(prev => ({
+      ...prev,
+      [companyName]: prev[companyName].map(worker =>
+        worker.id === workerId ? { ...worker, [field]: Number(previewEditValue) } : worker
+      )
+    }));
+    setEditingPreviewCell(null);
+    setPreviewEditValue('');
+  };
+
+  const cancelWorkStatsEdit = () => {
+    setEditingPreviewCell(null);
+    setPreviewEditValue('');
   };
 
   // 상세보기 페이지 렌더링
@@ -828,12 +855,12 @@ const AdminDashboard = ({ onClose }) => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handlePrint(companyName);
+                              setPrintPreview({ companyName, workers: companyWorkers });
                             }}
-                            className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-2 print:hidden"
+                            className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-2"
                           >
-                            <Printer className="w-4 h-4" />
-                            인쇄
+                            <Eye className="w-4 h-4" />
+                            인쇄 프리뷰
                           </button>
                         </div>
                       </div>
@@ -860,8 +887,76 @@ const AdminDashboard = ({ onClose }) => {
                                 <tr key={worker.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                   <td className="px-4 py-3 font-semibold text-gray-900 border border-gray-300">{worker.name}</td>
                                   <td className="px-4 py-3 text-gray-700 border border-gray-300">{worker.department}</td>
-                                  <td className="px-4 py-3 text-center text-gray-900 border border-gray-300">{worker.workDays}일</td>
-                                  <td className="px-4 py-3 text-center font-bold text-blue-600 border border-gray-300">{worker.totalHours}h</td>
+                                  <td className="px-4 py-3 text-center text-gray-900 border border-gray-300">
+                                    {editingPreviewCell?.companyName === companyName &&
+                                     editingPreviewCell?.workerId === worker.id &&
+                                     editingPreviewCell?.field === 'workDays' ? (
+                                      <div className="flex items-center justify-center gap-2">
+                                        <input
+                                          type="number"
+                                          value={previewEditValue}
+                                          onChange={(e) => setPreviewEditValue(e.target.value)}
+                                          className="w-20 px-2 py-1 border border-duru-orange-500 rounded focus:outline-none focus:ring-2 focus:ring-duru-orange-500 text-center"
+                                          autoFocus
+                                        />
+                                        <button
+                                          onClick={saveWorkStatsEdit}
+                                          className="p-1 hover:bg-green-100 rounded"
+                                        >
+                                          <Check className="w-4 h-4 text-green-600" />
+                                        </button>
+                                        <button
+                                          onClick={cancelWorkStatsEdit}
+                                          className="p-1 hover:bg-red-100 rounded"
+                                        >
+                                          <X className="w-4 h-4 text-red-600" />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div
+                                        onClick={() => startWorkStatsEdit(companyName, worker.id, 'workDays', worker.workDays)}
+                                        className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded inline-flex items-center gap-1"
+                                      >
+                                        <span>{worker.workDays}일</span>
+                                        <Edit className="w-3 h-3 text-gray-400" />
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-3 text-center font-bold text-blue-600 border border-gray-300">
+                                    {editingPreviewCell?.companyName === companyName &&
+                                     editingPreviewCell?.workerId === worker.id &&
+                                     editingPreviewCell?.field === 'totalHours' ? (
+                                      <div className="flex items-center justify-center gap-2">
+                                        <input
+                                          type="number"
+                                          value={previewEditValue}
+                                          onChange={(e) => setPreviewEditValue(e.target.value)}
+                                          className="w-20 px-2 py-1 border border-duru-orange-500 rounded focus:outline-none focus:ring-2 focus:ring-duru-orange-500 text-center"
+                                          autoFocus
+                                        />
+                                        <button
+                                          onClick={saveWorkStatsEdit}
+                                          className="p-1 hover:bg-green-100 rounded"
+                                        >
+                                          <Check className="w-4 h-4 text-green-600" />
+                                        </button>
+                                        <button
+                                          onClick={cancelWorkStatsEdit}
+                                          className="p-1 hover:bg-red-100 rounded"
+                                        >
+                                          <X className="w-4 h-4 text-red-600" />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div
+                                        onClick={() => startWorkStatsEdit(companyName, worker.id, 'totalHours', worker.totalHours)}
+                                        className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded inline-flex items-center gap-1"
+                                      >
+                                        <span>{worker.totalHours}h</span>
+                                        <Edit className="w-3 h-3 text-gray-400" />
+                                      </div>
+                                    )}
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
@@ -994,6 +1089,96 @@ const AdminDashboard = ({ onClose }) => {
           </div>
         )}
       </div>
+
+      {/* 인쇄 프리뷰 모달 */}
+      {printPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">인쇄 프리뷰</h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    window.print();
+                  }}
+                  className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-2"
+                >
+                  <Printer className="w-4 h-4" />
+                  인쇄
+                </button>
+                <button
+                  onClick={() => setPrintPreview(null)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-8" id="print-content">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-center mb-2">{printPreview.companyName} 월 근무 통계</h2>
+                <p className="text-center text-gray-600">{selectedMonth.split('-')[0]}년 {selectedMonth.split('-')[1]}월</p>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead className="bg-duru-orange-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">이름</th>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">부서</th>
+                      <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">출근 일수</th>
+                      <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">총 근무시간</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {printPreview.workers.map((worker, index) => (
+                      <tr key={worker.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="px-4 py-3 font-semibold text-gray-900 border border-gray-300">{worker.name}</td>
+                        <td className="px-4 py-3 text-gray-700 border border-gray-300">{worker.department}</td>
+                        <td className="px-4 py-3 text-center text-gray-900 border border-gray-300">{worker.workDays}일</td>
+                        <td className="px-4 py-3 text-center font-bold text-blue-600 border border-gray-300">{worker.totalHours}h</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-duru-orange-100 border-t-2 border-duru-orange-500">
+                    <tr>
+                      <td colSpan="2" className="px-4 py-3 font-bold text-gray-900 border border-gray-300">평균</td>
+                      <td className="px-4 py-3 text-center font-bold text-gray-900 border border-gray-300">
+                        {(printPreview.workers.reduce((sum, w) => sum + w.workDays, 0) / printPreview.workers.length).toFixed(1)}일
+                      </td>
+                      <td className="px-4 py-3 text-center font-bold text-blue-600 border border-gray-300">
+                        {(printPreview.workers.reduce((sum, w) => sum + w.totalHours, 0) / printPreview.workers.length).toFixed(1)}h
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <div className="mt-8 pt-6 border-t-2 border-gray-300">
+                <div className="grid grid-cols-2 gap-8 mb-6">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">기업 (대표자)</p>
+                    <div className="border-2 border-gray-300 rounded-lg p-6 h-24 flex items-center justify-center">
+                      <p className="text-gray-400">(서명/인)</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">두루빛터 (담당자)</p>
+                    <div className="border-2 border-gray-300 rounded-lg p-6 h-24 flex items-center justify-center">
+                      <p className="text-gray-400">(서명/인)</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-between text-sm text-gray-600 mt-4">
+                  <div>발급일: {new Date().toLocaleDateString('ko-KR')}</div>
+                  <div>두루빛터 중앙 통제 시스템</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
