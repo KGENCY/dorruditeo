@@ -32,6 +32,15 @@ const AdminDashboard = ({ onClose }) => {
   const [addCompanyComplete, setAddCompanyComplete] = useState({});
   const [editingRevenue, setEditingRevenue] = useState(null); // {companyId: number}
   const [revenueEditValue, setRevenueEditValue] = useState('');
+  const [selectedInquiry, setSelectedInquiry] = useState(null);
+  const [inquiryList, setInquiryList] = useState([
+    { id: 1, company: '(주)삼성전자', ceo: '홍길동', date: '2026-01-30', phone: '02-1234-5678', email: 'hong@samsung.com', summary: '장애인 고용 관련 상담을 받고 싶습니다.', content: '현재 장애인 고용 의무 비율 관련하여 채용 및 관리 프로세스 상담을 받고 싶습니다. 특히 제조 현장에 적합한 직무 배치 방안이 궁금합니다.' },
+    { id: 2, company: '(주)현대자동차', ceo: '김철수', date: '2026-01-29', phone: '02-2345-6789', email: 'kim@hyundai.com', summary: '파견 근로자 배치 문의드립니다.', content: '울산 공장 내 경포장 라인에 장애인 근로자 파견을 검토하고 있습니다. 가능한 인원과 절차가 궁금합니다.' },
+    { id: 3, company: '(주)LG전자', ceo: '박영희', date: '2026-01-28', phone: '02-3456-7890', email: 'park@lg.com', summary: '고용 장려금 컨설팅 요청합니다.', content: '장애인 고용 장려금 신청 절차와 두루빛터 서비스 연계 방안에 대해 상세히 알고 싶습니다.' },
+    { id: 4, company: '(주)CJ대한통운', ceo: '이정호', date: '2026-01-27', phone: '02-4567-8901', email: 'lee@cj.com', summary: '물류센터 인력 배치 상담 요청합니다.', content: '경기도 이천 물류센터에 단순 분류 작업이 가능한 장애인 근로자 배치를 희망합니다.' },
+    { id: 5, company: '(주)아모레퍼시픽', ceo: '서민지', date: '2026-01-26', phone: '02-5678-9012', email: 'seo@amore.com', summary: '사회공헌 연계 고용 프로그램 문의합니다.', content: 'ESG 경영 차원에서 장애인 고용과 연계한 사회공헌 프로그램을 기획 중입니다. 협업 가능 여부를 확인하고 싶습니다.' },
+    { id: 6, company: '(주)롯데마트', ceo: '한상우', date: '2026-01-25', phone: '02-6789-0123', email: 'han@lotte.com', summary: '매장 내 직무 배치 가능 여부가 궁금합니다.', content: '서울 시내 매장에 장애인 근로자를 배치할 수 있는 직무가 있는지 상담받고 싶습니다.' },
+  ]);
   const [companiesData, setCompaniesData] = useState([
     { id: 1, name: '(주)두루빛 제조', industry: '제조업', location: '서울 강남구', workers: 15, contractEnd: '2026-12-31', status: 'active', revenue: 4500000 },
     { id: 2, name: '세종식품', industry: '식품가공', location: '경기 성남시', workers: 12, contractEnd: '2026-03-15', status: 'expiring', revenue: 3600000 },
@@ -111,6 +120,15 @@ const AdminDashboard = ({ onClose }) => {
     { id: 3, type: 'attendance', title: '최동욱 장기 결근', message: '3일 연속 결근, 연락 필요', priority: 'high', date: '2026-01-26' },
     { id: 4, type: 'payment', title: '한빛포장 1월 정산 완료', message: '정산 금액: ₩5,400,000', priority: 'low', date: '2026-01-25' },
   ];
+
+  const absenceAlerts = [
+    { id: 1, name: '최동욱', company: '그린팜', date: '2026-01-26', status: '결근', detail: '3일 연속 결근, 연락 필요' },
+    { id: 2, name: '김민수', company: '(주)두루빛 제조', date: '2026-01-30', status: '미확인', detail: '금일 출근 미확인, 보호자 연락 시도 중' },
+    { id: 3, name: '정미라', company: '한빛포장', date: '2026-01-31', status: '결근', detail: '무단 결근, 사유 미확인' },
+    { id: 4, name: '이영희', company: '(주)두루빛 제조', date: '2026-01-31', status: '미확인', detail: '오전 출근 미확인, 전일 조퇴 이력 있음' },
+    { id: 5, name: '박철수', company: '세종식품', date: '2026-02-01', status: '결근', detail: '병가 신청 없이 결근, 확인 필요' },
+  ];
+
 
   // 오늘 날짜 출퇴근 데이터 (회사별, 시간대별로 그룹화)
   const [dailyAttendance, setDailyAttendance] = useState({
@@ -1112,51 +1130,132 @@ const AdminDashboard = ({ onClose }) => {
         )}
 
         {activeTab === 'notifications' && (
-          <div className="space-y-6">
+          <div className="space-y-5">
             <h2 className="text-2xl font-bold text-gray-900">알림 센터</h2>
 
-            <div className="space-y-3">
-              {notifications.map(notif => (
-                <div
-                  key={notif.id}
-                  className={`p-4 rounded-lg border ${
-                    notif.priority === 'high' ? 'bg-red-50 border-red-200' :
-                    notif.priority === 'medium' ? 'bg-yellow-50 border-yellow-200' :
-                    'bg-gray-50 border-gray-200'
-                  }`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      notif.priority === 'high' ? 'bg-red-100' :
-                      notif.priority === 'medium' ? 'bg-yellow-100' :
-                      'bg-gray-100'
-                    }`}>
-                      {notif.type === 'contract' && <FileText className={`w-5 h-5 ${notif.priority === 'high' ? 'text-red-600' : 'text-yellow-600'}`} />}
-                      {notif.type === 'document' && <Upload className={`w-5 h-5 ${notif.priority === 'high' ? 'text-red-600' : 'text-yellow-600'}`} />}
-                      {notif.type === 'attendance' && <AlertCircle className="w-5 h-5 text-red-600" />}
-                      {notif.type === 'payment' && <DollarSign className="w-5 h-5 text-gray-600" />}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-gray-900">{notif.title}</span>
-                        <span className="text-xs text-gray-500">{notif.date}</span>
-                        <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                          notif.priority === 'high' ? 'bg-red-100 text-red-700' :
-                          notif.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
-                          {notif.priority === 'high' ? '긴급' : notif.priority === 'medium' ? '중요' : '일반'}
-                        </span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 좌측: 장애인 근로자 결근 알림 */}
+              <div className="bg-white rounded-xl border border-gray-200">
+                <div className="px-6 py-5 border-b border-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-duru-orange-500" />
+                    장애인 근로자 결근 알림
+                  </h3>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {absenceAlerts.length > 0 ? absenceAlerts.map(alert => (
+                    <div key={alert.id} className="px-6 py-3.5 flex items-center gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-bold text-gray-900">{alert.name}</span>
+                          <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                            alert.status === '결근' ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600'
+                          }`}>
+                            {alert.status}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-500">{alert.company} · {alert.date}</p>
+                        <p className="text-sm text-gray-400 mt-0.5 line-clamp-2">{alert.detail}</p>
                       </div>
-                      <p className="text-sm text-gray-600">{notif.message}</p>
+                      <button className="px-4 py-2 rounded-lg border border-duru-orange-300 bg-duru-orange-50 text-duru-orange-600 hover:bg-duru-orange-100 text-sm font-semibold whitespace-nowrap transition-colors">
+                        확인하기
+                      </button>
                     </div>
-                    <button className="text-duru-orange-600 hover:text-duru-orange-700 font-semibold text-sm whitespace-nowrap">
-                      처리하기
+                  )) : (
+                    <div className="py-16 text-center text-gray-400 text-sm">
+                      현재 확인할 알림이 없습니다.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 우측: 신규 기업 문의 알림 */}
+              <div className="bg-white rounded-xl border border-gray-200">
+                <div className="px-6 py-5 border-b border-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-gray-400" />
+                    신규 기업 문의 알림
+                  </h3>
+                  <p className="text-sm text-gray-400 mt-1">홈페이지를 통해 접수된 신규 기업 문의입니다.</p>
+                </div>
+                <div className="divide-y divide-gray-100">
+                  {inquiryList.length > 0 ? inquiryList.map(inq => (
+                    <div key={inq.id} className="px-6 py-3.5 flex items-center gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-bold text-gray-900">{inq.company}</span>
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-500">신규 문의</span>
+                        </div>
+                        <p className="text-sm text-gray-500">대표: {inq.ceo} · {inq.date}</p>
+                        <p className="text-sm text-gray-400 mt-0.5 truncate">{inq.summary}</p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedInquiry(inq)}
+                        className="px-4 py-2 rounded-lg bg-duru-orange-500 hover:bg-duru-orange-600 text-white text-sm font-semibold whitespace-nowrap transition-colors"
+                      >
+                        문의 확인
+                      </button>
+                    </div>
+                  )) : (
+                    <div className="py-16 text-center text-gray-400 text-sm">
+                      현재 확인할 알림이 없습니다.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 문의 상세 모달 */}
+            {selectedInquiry && (
+              <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setSelectedInquiry(null)}>
+                <div className="bg-white rounded-xl w-full max-w-lg mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
+                  <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-gray-900">기업 문의 상세</h3>
+                    <button onClick={() => setSelectedInquiry(null)} className="text-gray-400 hover:text-gray-600">
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
+                  <div className="px-6 py-6">
+                    <h4 className="text-sm font-semibold text-gray-500 mb-3">기업 정보</h4>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">기업명</p>
+                        <p className="text-base font-bold text-gray-900">{selectedInquiry.company}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">대표자</p>
+                        <p className="text-base text-gray-900">{selectedInquiry.ceo}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">전화번호</p>
+                        <p className="text-base text-gray-900">{selectedInquiry.phone}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">이메일</p>
+                        <p className="text-base text-gray-900">{selectedInquiry.email}</p>
+                      </div>
+                    </div>
+                    <div className="border-t border-gray-100 pt-5">
+                      <h4 className="text-sm font-semibold text-gray-500 mb-2">문의 내용</h4>
+                      <p className="text-base text-gray-800 leading-relaxed whitespace-pre-line">{selectedInquiry.content}</p>
+                      <p className="text-xs text-gray-400 mt-3">접수일: {selectedInquiry.date}</p>
+                    </div>
+                  </div>
+                  <div className="px-6 py-5 border-t border-gray-100 space-y-2">
+                    <button
+                      onClick={() => {
+                        setInquiryList(prev => prev.filter(i => i.id !== selectedInquiry.id));
+                        setSelectedInquiry(null);
+                      }}
+                      className="w-full py-3 bg-duru-orange-500 hover:bg-duru-orange-600 text-white rounded-lg text-base font-bold transition-colors"
+                    >
+                      상담 완료
+                    </button>
+                    <p className="text-xs text-gray-400 text-center">상담이 완료된 문의는 알림 센터에서 자동 제거됩니다.</p>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
