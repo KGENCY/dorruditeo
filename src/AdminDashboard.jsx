@@ -203,6 +203,9 @@ const AdminDashboard = ({ onClose }) => {
       { id: 1, name: '김민수', department: '제조부', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
       { id: 2, name: '이영희', department: '포장부', totalHours: 168, avgHours: 7.6, workDays: 22, lateDays: 1 },
       { id: 7, name: '김수진', department: '제조부', totalHours: 172, avgHours: 7.8, workDays: 22, lateDays: 0 },
+      { id: 16, name: '박영수', department: '포장부', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
+      { id: 17, name: '최지현', department: '제조부', totalHours: 170, avgHours: 7.7, workDays: 22, lateDays: 1 },
+      { id: 18, name: '정민아', department: '품질관리', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
     ],
     '세종식품': [
       { id: 3, name: '박철수', department: '생산부', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
@@ -362,60 +365,6 @@ const AdminDashboard = ({ onClose }) => {
                 </div>
                 <p className="text-sm text-gray-600 mb-1">긴급 알림</p>
                 <p className="text-3xl font-bold text-red-600">{stats.pendingIssues}건</p>
-              </div>
-            </div>
-
-            {/* 빠른 통계 */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">출근 현황</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">오늘 출근율</span>
-                    <span className="text-2xl font-bold text-duru-orange-600">{stats.attendanceRate}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-duru-orange-500 h-2 rounded-full" style={{ width: `${stats.attendanceRate}%` }}></div>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">출근: {stats.activeWorkers}명</span>
-                    <span className="text-gray-600">결근: {stats.totalWorkers - stats.activeWorkers}명</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">이번 달 수수료 현황</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">예상 수수료 총액</span>
-                    <span className="text-2xl font-bold text-blue-600">₩4,560만</span>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    <p>• 정상 처리: 20개사</p>
-                    <p>• 재계산 필요: 4개사</p>
-                  </div>
-                  <button className="text-duru-orange-600 hover:text-duru-orange-700 font-semibold text-sm">
-                    상세보기 →
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">신규 문의 / 상담</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">신규 문의</span>
-                    <span className="text-2xl font-bold text-purple-600">{stats.newInquiries}건</span>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    <p>• 미처리 상담: {stats.pendingConsultations}건</p>
-                    <p>• 이번 달 신규: {stats.newInquiries}건</p>
-                  </div>
-                  <button className="text-duru-orange-600 hover:text-duru-orange-700 font-semibold text-sm">
-                    전체보기 →
-                  </button>
-                </div>
               </div>
             </div>
 
