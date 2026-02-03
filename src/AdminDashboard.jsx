@@ -236,6 +236,19 @@ const AdminDashboard = ({ onClose }) => {
     setSelectedDate(newDate);
   };
 
+  const changeMonth = (offset) => {
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const newDate = new Date(year, month - 1 + offset, 1);
+    const newYear = newDate.getFullYear();
+    const newMonth = String(newDate.getMonth() + 1).padStart(2, '0');
+    setSelectedMonth(`${newYear}-${newMonth}`);
+  };
+
+  const formatMonthDisplay = (monthString) => {
+    const [year, month] = monthString.split('-');
+    return `${year}년 ${month}월`;
+  };
+
   const getAttendanceStatus = (worker) => {
     if (worker.checkin === '-') return '출근 전';
     if (worker.checkout === '-') return '출근 중';
@@ -1017,13 +1030,26 @@ const AdminDashboard = ({ onClose }) => {
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-duru-orange-600" />
-                  <input
-                    type="month"
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="px-4 py-2 border-2 border-duru-orange-500 rounded-lg bg-duru-orange-50 text-duru-orange-600 font-bold focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
-                  />
+                  <button
+                    onClick={() => changeMonth(-1)}
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    title="이전 달"
+                  >
+                    <ChevronDown className="w-5 h-5 rotate-90" />
+                  </button>
+                  <div className="flex items-center gap-2 px-4 py-2 border-2 border-duru-orange-500 rounded-lg bg-duru-orange-50">
+                    <Calendar className="w-5 h-5 text-duru-orange-600" />
+                    <span className="text-duru-orange-600 font-bold min-w-[100px] text-center">
+                      {formatMonthDisplay(selectedMonth)}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => changeMonth(1)}
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    title="다음 달"
+                  >
+                    <ChevronDown className="w-5 h-5 -rotate-90" />
+                  </button>
                 </div>
               </div>
             </div>
