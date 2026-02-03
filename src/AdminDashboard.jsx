@@ -260,24 +260,23 @@ const AdminDashboard = ({ onClose }) => {
   // 근무 통계 데이터 (월별 근무시간)
   const [monthlyWorkStats, setMonthlyWorkStats] = useState({
     '(주)두루빛 제조': [
-      { id: 1, name: '김민수', department: '제조부', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
-      { id: 2, name: '이영희', department: '포장부', totalHours: 168, avgHours: 7.6, workDays: 22, lateDays: 1 },
-      { id: 7, name: '김수진', department: '제조부', totalHours: 172, avgHours: 7.8, workDays: 22, lateDays: 0 },
-      { id: 16, name: '박영수', department: '포장부', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
-      { id: 17, name: '최지현', department: '제조부', totalHours: 170, avgHours: 7.7, workDays: 22, lateDays: 1 },
-      { id: 18, name: '정민아', department: '품질관리', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
+      { id: 1, name: '김민수', department: '제조부', workSchedule: '월, 화, 수, 목, 금', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
+      { id: 2, name: '이영희', department: '포장부', workSchedule: '월, 화, 수, 목, 금', totalHours: 168, avgHours: 7.6, workDays: 22, lateDays: 1 },
+      { id: 7, name: '김수진', department: '제조부', workSchedule: '화, 수, 목, 금, 토', totalHours: 172, avgHours: 7.8, workDays: 22, lateDays: 0 },
+      { id: 16, name: '박영수', department: '포장부', workSchedule: '월, 화, 수, 목, 금', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
+      { id: 17, name: '최지현', department: '제조부', workSchedule: '월, 수, 금', totalHours: 170, avgHours: 7.7, workDays: 22, lateDays: 1 },
     ],
     '세종식품': [
-      { id: 3, name: '박철수', department: '생산부', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
-      { id: 8, name: '이민호', department: '생산부', totalHours: 160, avgHours: 7.3, workDays: 22, lateDays: 3 },
+      { id: 3, name: '박철수', department: '생산부', workSchedule: '월, 화, 수, 목, 금', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
+      { id: 8, name: '이민호', department: '생산부', workSchedule: '화, 수, 목, 금, 토', totalHours: 160, avgHours: 7.3, workDays: 22, lateDays: 3 },
     ],
     '한빛포장': [
-      { id: 4, name: '정미라', department: '품질관리', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 2 },
-      { id: 9, name: '박지영', department: '포장부', totalHours: 175, avgHours: 8.0, workDays: 22, lateDays: 0 },
+      { id: 4, name: '정미라', department: '품질관리', workSchedule: '월, 화, 수, 목, 금', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 2 },
+      { id: 9, name: '박지영', department: '포장부', workSchedule: '월, 화, 목', totalHours: 175, avgHours: 8.0, workDays: 22, lateDays: 0 },
     ],
     '그린팜': [
-      { id: 5, name: '최동욱', department: '재배', totalHours: 140, avgHours: 6.4, workDays: 22, lateDays: 5 },
-      { id: 10, name: '강태민', department: '재배', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
+      { id: 5, name: '최동욱', department: '재배', workSchedule: '월, 화, 수, 목, 금', totalHours: 140, avgHours: 6.4, workDays: 22, lateDays: 5 },
+      { id: 10, name: '강태민', department: '재배', workSchedule: '화, 수, 목, 금, 토', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
     ],
   });
 
@@ -1089,7 +1088,7 @@ const AdminDashboard = ({ onClose }) => {
                             <thead className="bg-duru-orange-50">
                               <tr>
                                 <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">이름</th>
-                                <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">부서</th>
+                                <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">근무요일</th>
                                 <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">출근 일수</th>
                                 <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">총 근무시간</th>
                               </tr>
@@ -1098,7 +1097,7 @@ const AdminDashboard = ({ onClose }) => {
                               {companyWorkers.map((worker, index) => (
                                 <tr key={worker.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                   <td className="px-4 py-3 font-semibold text-gray-900 border border-gray-300">{worker.name}</td>
-                                  <td className="px-4 py-3 text-gray-700 border border-gray-300">{worker.department}</td>
+                                  <td className="px-4 py-3 text-center text-gray-700 border border-gray-300">{worker.workSchedule}</td>
                                   <td className="px-4 py-3 text-center text-gray-900 border border-gray-300">
                                     {editingPreviewCell?.companyName === companyName &&
                                      editingPreviewCell?.workerId === worker.id &&
@@ -1624,7 +1623,7 @@ const AdminDashboard = ({ onClose }) => {
                   <thead className="bg-duru-orange-50">
                     <tr>
                       <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">이름</th>
-                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">부서</th>
+                      <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">근무요일</th>
                       <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">출근 일수</th>
                       <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">총 근무시간</th>
                     </tr>
@@ -1633,7 +1632,7 @@ const AdminDashboard = ({ onClose }) => {
                     {printPreview.workers.map((worker, index) => (
                       <tr key={worker.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="px-4 py-3 font-semibold text-gray-900 border border-gray-300">{worker.name}</td>
-                        <td className="px-4 py-3 text-gray-700 border border-gray-300">{worker.department}</td>
+                        <td className="px-4 py-3 text-center text-gray-700 border border-gray-300">{worker.workSchedule}</td>
                         <td className="px-4 py-3 text-center text-gray-900 border border-gray-300">{worker.workDays}일</td>
                         <td className="px-4 py-3 text-center font-bold text-blue-600 border border-gray-300">{worker.totalHours}h</td>
                       </tr>
