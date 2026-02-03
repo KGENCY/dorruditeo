@@ -11,10 +11,10 @@ const CompanyDetail = ({ company, onClose }) => {
   });
 
   const workers = [
-    { id: 1, name: '김민수', position: '제조부', hireDate: '2025-06-15', status: '근무중', disability: '지체장애' },
-    { id: 2, name: '이영희', position: '포장부', hireDate: '2025-07-01', status: '근무중', disability: '청각장애' },
-    { id: 3, name: '박철수', position: '검수부', hireDate: '2025-08-10', status: '근무중', disability: '시각장애' },
-    { id: 4, name: '정수진', position: '사무보조', hireDate: '2025-09-01', status: '근무중', disability: '지적장애' },
+    { id: 1, name: '김민수', phone: '010-1234-5678', hireDate: '2025-06-15', status: '근무중', disability: '지체장애' },
+    { id: 2, name: '이영희', phone: '010-2345-6789', hireDate: '2025-07-01', status: '근무중', disability: '청각장애' },
+    { id: 3, name: '박철수', phone: '010-3456-7890', hireDate: '2025-08-10', status: '근무중', disability: '시각장애' },
+    { id: 4, name: '정수진', phone: '010-4567-8901', hireDate: '2025-09-01', status: '근무중', disability: '지적장애' },
   ];
 
   const uploadedFiles = [
@@ -230,7 +230,7 @@ const CompanyDetail = ({ company, onClose }) => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">이름</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">부서</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">전화번호</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">입사일</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">장애유형</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">상태</th>
@@ -240,7 +240,7 @@ const CompanyDetail = ({ company, onClose }) => {
                     {workers.map((worker) => (
                       <tr key={worker.id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 text-gray-900 font-medium">{worker.name}</td>
-                        <td className="px-4 py-3 text-gray-600">{worker.position}</td>
+                        <td className="px-4 py-3 text-gray-600">{worker.phone}</td>
                         <td className="px-4 py-3 text-gray-600">{worker.hireDate}</td>
                         <td className="px-4 py-3 text-gray-600">{worker.disability}</td>
                         <td className="px-4 py-3">

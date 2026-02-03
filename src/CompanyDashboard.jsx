@@ -74,11 +74,11 @@ const CompanyDashboard = ({ onClose }) => {
 
   // 더미 데이터
   const employees = [
-    { id: 1, name: '김민수', department: '제조부', status: 'checkin', checkinTime: '09:00', checkoutTime: null },
-    { id: 2, name: '이영희', department: '포장부', status: 'checkin', checkinTime: '09:15', checkoutTime: null },
-    { id: 3, name: '박철수', department: '제조부', status: 'checkout', checkinTime: '09:00', checkoutTime: '18:00' },
-    { id: 4, name: '정미라', department: '품질관리부', status: 'checkin', checkinTime: '08:45', checkoutTime: null },
-    { id: 5, name: '최동욱', department: '포장부', status: 'absent', checkinTime: null, checkoutTime: null },
+    { id: 1, name: '김민수', phone: '010-1234-5678', disability: '지체장애 3급', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:00', checkoutTime: null },
+    { id: 2, name: '이영희', phone: '010-2345-6789', disability: '청각장애 2급', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:15', checkoutTime: null },
+    { id: 3, name: '박철수', phone: '010-3456-7890', disability: '시각장애 4급', contractEnd: '2026-03-15', status: 'checkout', checkinTime: '09:00', checkoutTime: '18:00' },
+    { id: 4, name: '정미라', phone: '010-4567-8901', disability: '지체장애 2급', contractEnd: '2027-06-30', status: 'checkin', checkinTime: '08:45', checkoutTime: null },
+    { id: 5, name: '최동욱', phone: '010-5678-9012', disability: '발달장애 3급', contractEnd: '2026-02-28', status: 'absent', checkinTime: null, checkoutTime: null },
   ];
 
   const todayStats = {
@@ -96,33 +96,33 @@ const CompanyDashboard = ({ onClose }) => {
     // 더미 데이터 - 실제로는 서버에서 해당 날짜 데이터를 가져옴
     if (date.getDate() === 28 && date.getMonth() === 0 && date.getFullYear() === 2026) {
       return [
-        { id: 1, name: '김민수', department: '제조부', checkinTime: '09:00', checkoutTime: '-', status: 'checkin', workDone: '' },
-        { id: 2, name: '이영희', department: '포장부', checkinTime: '09:15', checkoutTime: '-', status: 'checkin', workDone: '' },
-        { id: 3, name: '박철수', department: '제조부', checkinTime: '09:00', checkoutTime: '-', status: 'checkin', workDone: '' },
-        { id: 4, name: '정미라', department: '품질관리부', checkinTime: '08:45', checkoutTime: '-', status: 'checkin', workDone: '' },
-        { id: 5, name: '최동욱', department: '포장부', checkinTime: '-', checkoutTime: '-', status: 'pending', workDone: '' },
+        { id: 1, name: '김민수', phone: '010-1234-5678', checkinTime: '09:00', checkoutTime: '-', status: 'checkin', workDone: '' },
+        { id: 2, name: '이영희', phone: '010-2345-6789', checkinTime: '09:15', checkoutTime: '-', status: 'checkin', workDone: '' },
+        { id: 3, name: '박철수', phone: '010-3456-7890', checkinTime: '09:00', checkoutTime: '-', status: 'checkin', workDone: '' },
+        { id: 4, name: '정미라', phone: '010-4567-8901', checkinTime: '08:45', checkoutTime: '-', status: 'checkin', workDone: '' },
+        { id: 5, name: '최동욱', phone: '010-5678-9012', checkinTime: '-', checkoutTime: '-', status: 'pending', workDone: '' },
       ];
     } else if (date.getDate() === 27 && date.getMonth() === 0 && date.getFullYear() === 2026) {
       return [
-        { id: 1, name: '김민수', department: '제조부', checkinTime: '09:05', checkoutTime: '18:10', status: 'checkout', workDone: '제품 검수 및 정리' },
-        { id: 2, name: '이영희', department: '포장부', checkinTime: '09:00', checkoutTime: '18:00', status: 'checkout', workDone: '포장 작업' },
-        { id: 3, name: '박철수', department: '제조부', checkinTime: '09:00', checkoutTime: '18:05', status: 'checkout', workDone: '조립 라인 관리' },
-        { id: 4, name: '정미라', department: '품질관리부', checkinTime: '08:50', checkoutTime: '18:00', status: 'checkout', workDone: '품질 검사 및 보고서 작성' },
-        { id: 5, name: '최동욱', department: '포장부', checkinTime: null, checkoutTime: null, status: 'absent', workDone: '' },
+        { id: 1, name: '김민수', phone: '010-1234-5678', checkinTime: '09:05', checkoutTime: '18:10', status: 'checkout', workDone: '제품 검수 및 정리' },
+        { id: 2, name: '이영희', phone: '010-2345-6789', checkinTime: '09:00', checkoutTime: '18:00', status: 'checkout', workDone: '포장 작업' },
+        { id: 3, name: '박철수', phone: '010-3456-7890', checkinTime: '09:00', checkoutTime: '18:05', status: 'checkout', workDone: '조립 라인 관리' },
+        { id: 4, name: '정미라', phone: '010-4567-8901', checkinTime: '08:50', checkoutTime: '18:00', status: 'checkout', workDone: '품질 검사 및 보고서 작성' },
+        { id: 5, name: '최동욱', phone: '010-5678-9012', checkinTime: null, checkoutTime: null, status: 'absent', workDone: '' },
       ];
     } else if (date.getDate() === 26 && date.getMonth() === 0 && date.getFullYear() === 2026) {
       return [
-        { id: 1, name: '김민수', department: '제조부', checkinTime: '09:00', checkoutTime: '17:55', status: 'checkout', workDone: '재고 정리' },
-        { id: 2, name: '이영희', department: '포장부', checkinTime: '09:10', checkoutTime: '18:00', status: 'checkout', workDone: '배송 준비' },
-        { id: 3, name: '박철수', department: '제조부', checkinTime: '09:00', checkoutTime: '18:00', status: 'checkout', workDone: '기계 점검' },
-        { id: 4, name: '정미라', department: '품질관리부', checkinTime: '09:00', checkoutTime: '18:10', status: 'checkout', workDone: '최종 검수' },
-        { id: 5, name: '최동욱', department: '포장부', checkinTime: '09:15', checkoutTime: '18:05', status: 'checkout', workDone: '포장 작업' },
+        { id: 1, name: '김민수', phone: '010-1234-5678', checkinTime: '09:00', checkoutTime: '17:55', status: 'checkout', workDone: '재고 정리' },
+        { id: 2, name: '이영희', phone: '010-2345-6789', checkinTime: '09:10', checkoutTime: '18:00', status: 'checkout', workDone: '배송 준비' },
+        { id: 3, name: '박철수', phone: '010-3456-7890', checkinTime: '09:00', checkoutTime: '18:00', status: 'checkout', workDone: '기계 점검' },
+        { id: 4, name: '정미라', phone: '010-4567-8901', checkinTime: '09:00', checkoutTime: '18:10', status: 'checkout', workDone: '최종 검수' },
+        { id: 5, name: '최동욱', phone: '010-5678-9012', checkinTime: '09:15', checkoutTime: '18:05', status: 'checkout', workDone: '포장 작업' },
       ];
     } else {
       return [
-        { id: 1, name: '김민수', department: '제조부', checkinTime: '09:00', checkoutTime: '18:00', status: 'checkout', workDone: '일반 업무' },
-        { id: 2, name: '이영희', department: '포장부', checkinTime: '09:00', checkoutTime: '18:00', status: 'checkout', workDone: '일반 업무' },
-        { id: 3, name: '박철수', department: '제조부', checkinTime: '09:00', checkoutTime: '18:00', status: 'checkout', workDone: '일반 업무' },
+        { id: 1, name: '김민수', phone: '010-1234-5678', checkinTime: '09:00', checkoutTime: '18:00', status: 'checkout', workDone: '일반 업무' },
+        { id: 2, name: '이영희', phone: '010-2345-6789', checkinTime: '09:00', checkoutTime: '18:00', status: 'checkout', workDone: '일반 업무' },
+        { id: 3, name: '박철수', phone: '010-3456-7890', checkinTime: '09:00', checkoutTime: '18:00', status: 'checkout', workDone: '일반 업무' },
       ];
     }
   };
@@ -281,7 +281,7 @@ const CompanyDashboard = ({ onClose }) => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">이름</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">부서</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">전화번호</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">출근</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">퇴근</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">상태</th>
@@ -299,7 +299,7 @@ const CompanyDashboard = ({ onClose }) => {
                             <span className="font-semibold text-gray-900">{record.name}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-gray-600">{record.department}</td>
+                        <td className="px-6 py-4 text-gray-600">{record.phone}</td>
                         <td className="px-6 py-4 text-gray-900">{record.checkinTime || '-'}</td>
                         <td className="px-6 py-4 text-gray-900">{record.checkoutTime || '-'}</td>
                         <td className="px-6 py-4">
@@ -343,7 +343,7 @@ const CompanyDashboard = ({ onClose }) => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="이름, 부서로 검색..."
+                    placeholder="이름, 전화번호로 검색..."
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
                   />
                 </div>
@@ -354,9 +354,9 @@ const CompanyDashboard = ({ onClose }) => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">이름</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">부서</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">출근 시간</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">퇴근 시간</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">전화번호</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">장애유형</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">계약만료</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">상태</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">관리</th>
                     </tr>
@@ -366,22 +366,22 @@ const CompanyDashboard = ({ onClose }) => {
                       <tr key={emp.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-duru-orange-100 rounded-full flex items-center justify-center">
-                              <span className="text-xs font-bold text-duru-orange-600">{emp.name[0]}</span>
+                            <div className="w-10 h-10 bg-duru-orange-100 rounded-full flex items-center justify-center">
+                              <span className="text-sm font-bold text-duru-orange-600">{emp.name[0]}</span>
                             </div>
                             <span className="font-semibold text-gray-900">{emp.name}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-gray-600">{emp.department}</td>
-                        <td className="px-6 py-4 text-gray-900">{emp.checkinTime || '-'}</td>
-                        <td className="px-6 py-4 text-gray-900">{emp.checkoutTime || '-'}</td>
+                        <td className="px-6 py-4 text-gray-900">{emp.phone}</td>
+                        <td className="px-6 py-4 text-gray-600">{emp.disability}</td>
+                        <td className="px-6 py-4 text-gray-900">{emp.contractEnd}</td>
                         <td className="px-6 py-4">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            emp.status === 'checkin' ? 'bg-duru-orange-100 text-duru-orange-700' :
-                            emp.status === 'checkout' ? 'bg-gray-200 text-gray-700' :
+                            emp.status === 'checkin' ? 'bg-green-100 text-green-700' :
+                            emp.status === 'checkout' ? 'bg-green-100 text-green-700' :
                             'bg-red-100 text-red-700'
                           }`}>
-                            {emp.status === 'checkin' ? '출근' : emp.status === 'checkout' ? '퇴근' : '결근'}
+                            {emp.status === 'absent' ? '결근' : '근무중'}
                           </span>
                         </td>
                         <td className="px-6 py-4">

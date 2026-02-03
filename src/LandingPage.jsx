@@ -18,12 +18,15 @@ import heroImage3 from './assets/장애인 의자.png';
 import AttendanceApp from './AttendanceApp';
 import CompanyDashboard from './CompanyDashboard';
 import AdminDashboard from './AdminDashboard';
+import CompanyInquiry from './CompanyInquiry';
 
 const LandingPage = () => {
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [showAttendanceApp, setShowAttendanceApp] = useState(false);
   const [showCompanyDashboard, setShowCompanyDashboard] = useState(false);
   const [showAdminDashboard, setShowAdminDashboard] = useState(false);
+  const [showCompanyInquiry, setShowCompanyInquiry] = useState(false);
+  const [newInquiries, setNewInquiries] = useState([]);
   const heroImages = [
     heroImage1,
     heroImage2,
@@ -46,7 +49,11 @@ const LandingPage = () => {
   }
 
   if (showAdminDashboard) {
-    return <AdminDashboard onClose={() => setShowAdminDashboard(false)} />;
+    return <AdminDashboard onClose={() => setShowAdminDashboard(false)} newInquiries={newInquiries} clearNewInquiries={() => setNewInquiries([])} />;
+  }
+
+  if (showCompanyInquiry) {
+    return <CompanyInquiry onClose={() => setShowCompanyInquiry(false)} onSubmitInquiry={(inquiry) => setNewInquiries(prev => [...prev, inquiry])} />;
   }
 
   return (
@@ -60,7 +67,7 @@ const LandingPage = () => {
 
           <div className="flex items-center gap-8">
             <nav className="hidden md:flex items-center gap-8 text-lg font-semibold text-gray-600">
-              <a href="#" className="hover:text-duru-orange-600 transition-colors">기업 맞춤안내</a>
+              <button onClick={() => setShowCompanyInquiry(true)} className="hover:text-duru-orange-600 transition-colors">신규 기업 문의</button>
               <a href="#" className="hover:text-duru-orange-600 transition-colors">채용정보</a>
               <a href="#" className="hover:text-duru-orange-600 transition-colors">고객센터</a>
             </nav>
@@ -313,8 +320,11 @@ const LandingPage = () => {
                   통합 근태/인사 관리 시스템 제공
                 </li>
               </ul>
-              <button className="w-full py-4 text-lg bg-white border border-gray-300 text-gray-700 font-bold rounded hover:bg-gray-100 transition-colors">
-                기업 서비스 바로가기
+              <button
+                onClick={() => setShowCompanyInquiry(true)}
+                className="w-full py-4 text-lg bg-white border border-gray-300 text-gray-700 font-bold rounded hover:bg-gray-100 transition-colors"
+              >
+                신규 기업 문의 신청
               </button>
             </div>
           </div>
