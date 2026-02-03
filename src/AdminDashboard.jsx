@@ -16,6 +16,7 @@ const AdminDashboard = ({ onClose }) => {
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 0, 28)); // 2026-01-28
   const [selectedTimeSlot, setSelectedTimeSlot] = useState({}); // 회사별 오전/오후 선택
   const [printPreview, setPrintPreview] = useState(null); // {companyName, workers}
+  const [showCalendar, setShowCalendar] = useState(false);
   const [editingPreviewCell, setEditingPreviewCell] = useState(null); // {workerId, field}
   const [previewEditValue, setPreviewEditValue] = useState('');
   const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
@@ -247,6 +248,33 @@ const AdminDashboard = ({ onClose }) => {
   const formatMonthDisplay = (monthString) => {
     const [year, month] = monthString.split('-');
     return `${year}년 ${month}월`;
+  };
+
+  // 캘린더 헬퍼 함수들
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    return new Date(year, month, 1).getDay();
+  };
+
+  const isSameDay = (date1, date2) => {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+  };
+
+  const handleCalendarDateSelect = (day) => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const newDate = new Date(year, month, day);
+    setSelectedDate(newDate);
+    setShowCalendar(false);
   };
 
   const getAttendanceStatus = (worker) => {
@@ -551,7 +579,7 @@ const AdminDashboard = ({ onClose }) => {
                     <Clock className="w-6 h-6 text-duru-orange-600" />
                     출퇴근 현황 (회사별)
                   </h2>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 relative">
                     <button
                       onClick={() => changeDate(-1)}
                       className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -559,15 +587,15 @@ const AdminDashboard = ({ onClose }) => {
                     >
                       <ChevronDown className="w-5 h-5 rotate-90" />
                     </button>
-                    <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowCalendar(!showCalendar)}
+                      className="flex items-center gap-2 px-4 py-2 border-2 border-duru-orange-500 rounded-lg bg-duru-orange-50 hover:bg-duru-orange-100 transition-colors cursor-pointer"
+                    >
                       <Calendar className="w-5 h-5 text-duru-orange-600" />
-                      <input
-                        type="date"
-                        value={selectedDate.toISOString().split('T')[0]}
-                        onChange={(e) => setSelectedDate(new Date(e.target.value))}
-                        className="px-4 py-2 border-2 border-duru-orange-500 rounded-lg bg-duru-orange-50 text-duru-orange-600 font-bold focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
-                      />
-                    </div>
+                      <span className="text-duru-orange-600 font-bold min-w-[180px] text-center">
+                        {formatDate(selectedDate)}
+                      </span>
+                    </button>
                     <button
                       onClick={() => changeDate(1)}
                       className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -575,6 +603,103 @@ const AdminDashboard = ({ onClose }) => {
                     >
                       <ChevronDown className="w-5 h-5 -rotate-90" />
                     </button>
+
+                    {/* 캘린더 드롭다운 */}
+                    {showCalendar && (
+                      <div className="absolute top-full right-0 mt-2 bg-white rounded-xl border-2 border-duru-orange-500 shadow-xl z-50 p-4 w-80">
+                        <div className="flex items-center justify-between mb-4">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newDate = new Date(selectedDate);
+                              newDate.setMonth(newDate.getMonth() - 1);
+                              setSelectedDate(newDate);
+                            }}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <ChevronDown className="w-5 h-5 text-gray-600 rotate-90" />
+                          </button>
+                          <span className="text-lg font-bold text-gray-900">
+                            {selectedDate.getFullYear()}년 {String(selectedDate.getMonth() + 1).padStart(2, '0')}월
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newDate = new Date(selectedDate);
+                              newDate.setMonth(newDate.getMonth() + 1);
+                              setSelectedDate(newDate);
+                            }}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <ChevronDown className="w-5 h-5 text-gray-600 -rotate-90" />
+                          </button>
+                        </div>
+
+                        {/* 요일 헤더 */}
+                        <div className="grid grid-cols-7 gap-1 mb-2">
+                          {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
+                            <div key={day} className={`text-center text-sm font-bold py-2 ${idx === 0 ? 'text-red-500' : idx === 6 ? 'text-blue-500' : 'text-gray-600'}`}>
+                              {day}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* 날짜 그리드 */}
+                        <div className="grid grid-cols-7 gap-1">
+                          {(() => {
+                            const daysInMonth = getDaysInMonth(selectedDate);
+                            const firstDay = getFirstDayOfMonth(selectedDate);
+                            const days = [];
+
+                            // 빈 칸 추가
+                            for (let i = 0; i < firstDay; i++) {
+                              days.push(<div key={`empty-${i}`} className="aspect-square" />);
+                            }
+
+                            // 날짜 추가
+                            for (let day = 1; day <= daysInMonth; day++) {
+                              const currentDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day);
+                              const isSelected = isSameDay(currentDate, selectedDate);
+                              const isToday = isSameDay(currentDate, new Date());
+                              const dayOfWeek = currentDate.getDay();
+
+                              days.push(
+                                <button
+                                  key={day}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCalendarDateSelect(day);
+                                  }}
+                                  className={`aspect-square flex items-center justify-center rounded-lg text-sm font-semibold transition-all ${
+                                    isSelected
+                                      ? 'bg-duru-orange-500 text-white'
+                                      : isToday
+                                      ? 'bg-blue-100 text-blue-600 border-2 border-blue-400'
+                                      : 'hover:bg-gray-100 text-gray-700'
+                                  } ${dayOfWeek === 0 ? 'text-red-500' : dayOfWeek === 6 ? 'text-blue-500' : ''}`}
+                                >
+                                  {day}
+                                </button>
+                              );
+                            }
+
+                            return days;
+                          })()}
+                        </div>
+
+                        {/* 오늘 버튼 */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDate(new Date());
+                            setShowCalendar(false);
+                          }}
+                          className="w-full mt-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors"
+                        >
+                          오늘
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
