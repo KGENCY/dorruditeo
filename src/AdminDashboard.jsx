@@ -68,6 +68,7 @@ const AdminDashboard = ({ onClose }) => {
     { id: 3, name: '한빛포장', industry: '포장/물류', location: '인천 남동구', workers: 18, contractEnd: '2027-06-30', status: 'active', revenue: 5400000 },
     { id: 4, name: '그린팜', industry: '농업', location: '충남 천안시', workers: 8, contractEnd: '2026-02-28', status: 'expiring', revenue: 2400000 },
     { id: 5, name: '참좋은케어', industry: '서비스업', location: '서울 송파구', workers: 10, contractEnd: '2026-09-15', status: 'active', revenue: 3000000 },
+    { id: 6, name: '지원 의원', industry: '의료', location: '경기 성남시', workers: 10, contractEnd: '2027-01-31', status: 'active', revenue: 3000000 },
   ]);
 
   const updateAddCompanyForm = (field, value) => {
@@ -1402,7 +1403,7 @@ const AdminDashboard = ({ onClose }) => {
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="회사명으로 검색..."
+                    placeholder="회사명, 지역, 업종으로 검색..."
                     value={companySearchQuery}
                     onChange={(e) => setCompanySearchQuery(e.target.value)}
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
