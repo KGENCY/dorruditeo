@@ -1,291 +1,337 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Building2, Phone, Mail, Users, FileText, Send, CheckCircle2 } from 'lucide-react';
+import { Home, Phone, Mail, CheckCircle2, User, Building2, MessageSquare, ShieldCheck } from 'lucide-react';
 
-const CompanyInquiry = ({ onClose }) => {
-  const [step, setStep] = useState('form'); // form, complete
+const CompanyInquiry = ({ onClose, onSubmitInquiry }) => {
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [formData, setFormData] = useState({
     companyName: '',
-    businessNumber: '',
-    contactName: '',
+    ceoName: '',
     phone: '',
     email: '',
-    employeeCount: '',
-    position: '',
     message: ''
   });
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
+
+  const handleBlur = (name) => {
+    setTouched(prev => ({ ...prev, [name]: true }));
+    validateField(name, formData[name]);
+  };
+
+  const validateField = (name, value) => {
+    let error = '';
+    if (!value.trim()) {
+      const labels = {
+        companyName: '기업명',
+        ceoName: '대표자명',
+        phone: '전화번호',
+        email: '이메일',
+        message: '문의 내용'
+      };
+      error = `${labels[name]}을(를) 입력해주세요.`;
+    } else if (name === 'phone') {
+      const phoneRegex = /^[\d]{2,4}-?[\d]{3,4}-?[\d]{4}$/;
+      if (!phoneRegex.test(value.replace(/\s/g, ''))) {
+        error = '올바른 전화번호 형식을 입력해주세요.';
+      }
+    } else if (name === 'email') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        error = '올바른 이메일 형식을 입력해주세요.';
+      }
+    }
+    setErrors(prev => ({ ...prev, [name]: error }));
+    return error;
+  };
+
+  const isAllFilled = formData.companyName.trim() &&
+    formData.ceoName.trim() &&
+    formData.phone.trim() &&
+    formData.email.trim() &&
+    formData.message.trim();
+
+  const isSubmitEnabled = isAllFilled && agreePrivacy;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // 실제로는 서버에 전송
-    setStep('complete');
+    const fields = ['companyName', 'ceoName', 'phone', 'email', 'message'];
+    const newTouched = {};
+    let hasError = false;
+
+    fields.forEach(field => {
+      newTouched[field] = true;
+      const error = validateField(field, formData[field]);
+      if (error) hasError = true;
+    });
+    setTouched(newTouched);
+
+    if (!hasError && agreePrivacy) {
+      if (onSubmitInquiry) {
+        const today = new Date();
+        const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        onSubmitInquiry({
+          company: formData.companyName,
+          ceo: formData.ceoName,
+          phone: formData.phone,
+          email: formData.email,
+          summary: formData.message.length > 40 ? formData.message.slice(0, 40) + '...' : formData.message,
+          content: formData.message,
+          date: dateStr
+        });
+      }
+      setShowCompleteModal(true);
+    }
   };
 
-  const isFormValid = () => {
-    return formData.companyName &&
-           formData.contactName &&
-           formData.phone &&
-           formData.email &&
-           formData.message;
+  const getInputClass = (name) => {
+    const base = 'w-full px-4 py-3.5 border rounded-xl text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-duru-orange-400 focus:border-transparent placeholder:text-gray-400';
+    if (touched[name] && errors[name]) {
+      return `${base} border-red-400 bg-red-50/50`;
+    }
+    return `${base} border-gray-200 bg-white hover:border-gray-300`;
   };
 
-  // 완료 페이지
-  if (step === 'complete') {
-    return (
-      <div className="min-h-screen bg-duru-ivory flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl">
-          <div className="bg-white rounded-2xl shadow-lg p-12 border border-duru-orange-100 text-center">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full mb-6">
-              <CheckCircle2 className="w-12 h-12 text-green-600" />
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              문의가 접수되었습니다
-            </h1>
-            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              빠른 시일 내에 담당자가 연락드리겠습니다.<br />
-              보다 자세한 상담을 원하시면 1588-0000으로 연락주세요.
-            </p>
-
-            <div className="bg-duru-orange-50 rounded-xl p-6 mb-8">
-              <h3 className="font-bold text-gray-900 mb-2">접수 정보</h3>
-              <div className="text-left space-y-2 text-gray-700">
-                <p><span className="font-semibold">기업명:</span> {formData.companyName}</p>
-                <p><span className="font-semibold">담당자:</span> {formData.contactName}</p>
-                <p><span className="font-semibold">연락처:</span> {formData.phone}</p>
-                <p><span className="font-semibold">이메일:</span> {formData.email}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={onClose}
-              className="w-full py-4 bg-duru-orange-500 text-white rounded-lg font-bold text-lg hover:bg-duru-orange-600 transition-colors"
-            >
-              메인으로 돌아가기
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 문의 폼 페이지
-  return (
-    <div className="min-h-screen bg-duru-ivory">
-      <div className="max-w-4xl mx-auto p-4 sm:p-8">
+  // 상단 고정 바 (공통)
+  const Header = () => (
+    <header className="bg-white/90 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="text-2xl font-bold text-duru-orange-600">두루빛터</div>
         <button
           onClick={onClose}
-          className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          className="p-2.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          aria-label="메인으로 이동"
         >
-          <ArrowLeft className="w-5 h-5" />
-          메인으로 돌아가기
+          <Home className="w-5 h-5" />
         </button>
+      </div>
+    </header>
+  );
 
-        <div className="bg-white rounded-2xl shadow-lg p-8 sm:p-12 border border-duru-orange-100">
-          {/* 헤더 */}
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-duru-orange-100 rounded-full mb-4">
-              <Building2 className="w-10 h-10 text-duru-orange-600" />
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">기업 채용 문의</h1>
-            <p className="text-lg text-gray-600">
-              장애인 근로자 채용에 관심있으신 기업을 환영합니다.<br />
-              아래 정보를 입력해주시면 빠르게 연락드리겠습니다.
-            </p>
+  return (
+    <div className="min-h-screen bg-duru-ivory">
+      <Header />
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* ① 히어로 섹션 */}
+        <section className="pt-12 pb-10 text-center">
+          <div className="flex items-center justify-center gap-3 mb-5">
+            <span className="w-10 h-[2px] bg-duru-orange-400"></span>
+            <span className="text-duru-orange-500 font-bold tracking-widest text-xs uppercase">
+              신규 기업 문의
+            </span>
+            <span className="w-10 h-[2px] bg-duru-orange-400"></span>
           </div>
 
-          {/* 폼 */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 기업 정보 섹션 */}
-            <div className="bg-duru-orange-50 rounded-xl p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-duru-orange-600" />
-                기업 정보
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    기업명 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    placeholder="(주)두루빛"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    사업자등록번호
-                  </label>
-                  <input
-                    type="text"
-                    name="businessNumber"
-                    value={formData.businessNumber}
-                    onChange={handleChange}
-                    placeholder="123-45-67890"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-            </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-snug mb-5 break-keep">
+            <span className="text-duru-orange-500">장애인 고용</span>을<br />
+            <span className="text-duru-orange-500">따뜻한 동행</span>으로 시작하세요
+          </h1>
 
-            {/* 담당자 정보 섹션 */}
-            <div className="bg-gray-50 rounded-xl p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-gray-700" />
-                담당자 정보
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
+          <p className="text-base sm:text-lg text-gray-500 leading-relaxed break-keep max-w-lg mx-auto">
+            간단한 정보만 남겨주시면<br />
+            두루빛터 담당 전문가가 직접 연락드려<br />
+            기업에 맞는 고용 방향을 함께 고민해드립니다.
+          </p>
+        </section>
+
+        {/* ② 상담/문의 입력 폼 */}
+        <section className="pb-6">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-soft p-8 sm:p-10">
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+
+              {/* 기업명 */}
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
+                  <Building2 className="w-4 h-4 text-gray-400" />
+                  기업명 <span className="text-duru-orange-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur('companyName')}
+                  placeholder="(주)회사명"
+                  className={getInputClass('companyName')}
+                />
+                {touched.companyName && errors.companyName && (
+                  <p className="mt-1.5 text-sm text-red-500">{errors.companyName}</p>
+                )}
+              </div>
+
+              {/* 대표자명 */}
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
+                  <User className="w-4 h-4 text-gray-400" />
+                  대표자명 <span className="text-duru-orange-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="ceoName"
+                  value={formData.ceoName}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur('ceoName')}
+                  placeholder="홍길동"
+                  className={getInputClass('ceoName')}
+                />
+                {touched.ceoName && errors.ceoName && (
+                  <p className="mt-1.5 text-sm text-red-500">{errors.ceoName}</p>
+                )}
+              </div>
+
+              {/* 전화번호 · 이메일 (2열) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    담당자명 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="contactName"
-                    value={formData.contactName}
-                    onChange={handleChange}
-                    placeholder="홍길동"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    부서/직책
-                  </label>
-                  <input
-                    type="text"
-                    name="position"
-                    value={formData.position}
-                    onChange={handleChange}
-                    placeholder="인사팀 과장"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    연락처 <span className="text-red-500">*</span>
+                  <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
+                    <Phone className="w-4 h-4 text-gray-400" />
+                    전화번호 <span className="text-duru-orange-500">*</span>
                   </label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="010-0000-0000"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent"
+                    onBlur={() => handleBlur('phone')}
+                    placeholder="02-1234-5678"
+                    className={getInputClass('phone')}
                   />
+                  {touched.phone && errors.phone && (
+                    <p className="mt-1.5 text-sm text-red-500">{errors.phone}</p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    이메일 <span className="text-red-500">*</span>
+                  <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
+                    <Mail className="w-4 h-4 text-gray-400" />
+                    이메일 <span className="text-duru-orange-500">*</span>
                   </label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    onBlur={() => handleBlur('email')}
                     placeholder="example@company.com"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent"
+                    className={getInputClass('email')}
                   />
+                  {touched.email && errors.email && (
+                    <p className="mt-1.5 text-sm text-red-500">{errors.email}</p>
+                  )}
                 </div>
               </div>
-            </div>
 
-            {/* 채용 정보 섹션 */}
-            <div className="bg-duru-orange-50 rounded-xl p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-duru-orange-600" />
-                채용 정보
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    희망 채용 인원
-                  </label>
-                  <select
-                    name="employeeCount"
-                    value={formData.employeeCount}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent"
-                  >
-                    <option value="">선택해주세요</option>
-                    <option value="1-5">1~5명</option>
-                    <option value="6-10">6~10명</option>
-                    <option value="11-20">11~20명</option>
-                    <option value="21+">21명 이상</option>
-                  </select>
-                </div>
-              </div>
+              {/* 문의 내용 */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  문의 내용 <span className="text-red-500">*</span>
+                <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 mb-2">
+                  <MessageSquare className="w-4 h-4 text-gray-400" />
+                  문의 내용 <span className="text-duru-orange-500">*</span>
                 </label>
                 <textarea
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder="채용하고자 하는 직무, 근무 조건, 궁금하신 점 등을 자유롭게 작성해주세요."
-                  rows={6}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent resize-none"
+                  onBlur={() => handleBlur('message')}
+                  rows={5}
+                  placeholder={"장애인 고용 의무 비율 상담,\n제조·사무·물류 등 직무 배치 가능 여부,\n현재 고민 중인 내용을 자유롭게 작성해주세요.\n\n두루빛터 담당자가 내용을 확인 후 직접 연락드립니다."}
+                  className={`${getInputClass('message')} resize-none`}
                 />
+                {touched.message && errors.message && (
+                  <p className="mt-1.5 text-sm text-red-500">{errors.message}</p>
+                )}
               </div>
-            </div>
 
-            {/* 제출 버튼 */}
-            <div className="pt-4">
+              {/* 신뢰 강화 안내 */}
+              <div className="flex items-start gap-3 bg-duru-orange-50 rounded-xl px-5 py-4">
+                <ShieldCheck className="w-5 h-5 text-duru-orange-500 mt-0.5 shrink-0" />
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  문의 내용을 확인한 후,{' '}
+                  <span className="font-semibold text-gray-800">두루빛터 담당 전문가가 직접 연락</span>드립니다.<br />
+                  자동 응답이 아닌, 기업 상황에 맞는 1:1 상담을 제공합니다.
+                </p>
+              </div>
+
+              {/* 개인정보 동의 체크박스 */}
+              <div className="flex justify-center">
+                <label className="inline-flex items-center gap-2.5 cursor-pointer select-none py-1">
+                  <input
+                    type="checkbox"
+                    checked={agreePrivacy}
+                    onChange={(e) => setAgreePrivacy(e.target.checked)}
+                    className="w-[18px] h-[18px] rounded border-gray-300 text-duru-orange-500 focus:ring-duru-orange-400 accent-duru-orange-500 cursor-pointer shrink-0"
+                  />
+                  <span className="text-sm text-gray-600 leading-relaxed">
+                    상담을 위한{' '}
+                    <span className="font-semibold text-gray-700 underline underline-offset-2 decoration-gray-300">
+                      개인정보 수집 및 이용
+                    </span>
+                    에 동의합니다.
+                  </span>
+                </label>
+              </div>
+
+              {/* CTA 버튼 */}
               <button
                 type="submit"
-                disabled={!isFormValid()}
-                className="w-full py-4 bg-duru-orange-500 text-white rounded-lg font-bold text-lg hover:bg-duru-orange-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={!isSubmitEnabled}
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
+                  isSubmitEnabled
+                    ? 'bg-duru-orange-500 text-white hover:bg-duru-orange-600 active:scale-[0.99]'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
               >
-                <Send className="w-5 h-5" />
-                문의 접수하기
+                두루빛터 상담 신청하기
               </button>
-              <p className="text-sm text-gray-500 text-center mt-3">
-                <span className="text-red-500">*</span> 표시는 필수 입력 항목입니다
-              </p>
-            </div>
-          </form>
-        </div>
 
-        {/* 추가 안내 */}
-        <div className="mt-8 bg-white rounded-xl p-6 border border-gray-200">
-          <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-            <Phone className="w-5 h-5 text-duru-orange-600" />
-            빠른 상담이 필요하신가요?
-          </h3>
-          <p className="text-gray-600 mb-3">
-            전화나 이메일로 직접 문의하실 수 있습니다.
-          </p>
-          <div className="space-y-2 text-gray-700">
-            <p className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-duru-orange-600" />
-              <span className="font-semibold">전화:</span> 1588-0000
+              {/* 개인정보 안내 */}
+              <p className="text-center text-xs text-gray-400 leading-relaxed">
+                입력하신 정보는 상담 목적 외에는 사용되지 않으며,<br />
+                두루빛터 담당자가 직접 상담을 위해 연락드립니다.
+              </p>
+            </form>
+          </div>
+        </section>
+
+        {/* 하단 여백 */}
+        <div className="pb-16"></div>
+      </div>
+
+      {/* ⑤ 상담 신청 완료 모달 */}
+      {showCompleteModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] px-4">
+          <div
+            className="bg-white rounded-2xl w-full max-w-md p-10 text-center shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-50 rounded-full mb-6">
+              <CheckCircle2 className="w-9 h-9 text-green-500" />
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-3 leading-snug">
+              상담 신청이<br />성공적으로 완료되었습니다!
+            </h2>
+
+            <p className="text-base text-gray-500 mb-8 leading-relaxed">
+              곧 두루빛터 담당자가<br />직접 연락드리겠습니다.
             </p>
-            <p className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-duru-orange-600" />
-              <span className="font-semibold">이메일:</span> contact@durubitter.com
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              평일 09:00 - 18:00 (주말 및 공휴일 휴무)
-            </p>
+
+            <button
+              onClick={onClose}
+              className="w-full py-3.5 bg-duru-orange-500 text-white rounded-xl font-bold text-base hover:bg-duru-orange-600 transition-colors"
+            >
+              메인으로 이동
+            </button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

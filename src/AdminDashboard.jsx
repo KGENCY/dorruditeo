@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Users, Building2, TrendingUp, AlertCircle, DollarSign, FileText, Search, Bell, Calendar, UserCheck, Clock, ChevronRight, Edit, Eye, Download, Upload, MessageSquare, Filter, Save, X, Check, ChevronDown, ChevronUp, BarChart3, Printer, Lock, CheckCircle2, Mail, Phone, MapPin, User } from 'lucide-react';
 import AdminWorkerDetail from './AdminWorkerDetail';
 import CompanyDetail from './CompanyDetail';
 
-const AdminDashboard = ({ onClose }) => {
+const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
   const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, companies, workers, workstats, notices, notifications, reports
   const [selectedMonth, setSelectedMonth] = useState('2026-01');
   const [selectedCompany, setSelectedCompany] = useState(null);
@@ -53,6 +53,7 @@ const AdminDashboard = ({ onClose }) => {
       sender: '관리자'
     }
   ]);
+  const [hasNewNotification, setHasNewNotification] = useState(true);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [inquiryList, setInquiryList] = useState([
     { id: 1, company: '(주)삼성전자', ceo: '홍길동', date: '2026-01-30', phone: '02-1234-5678', email: 'hong@samsung.com', summary: '장애인 고용 관련 상담을 받고 싶습니다.', content: '현재 장애인 고용 의무 비율 관련하여 채용 및 관리 프로세스 상담을 받고 싶습니다. 특히 제조 현장에 적합한 직무 배치 방안이 궁금합니다.' },
@@ -62,6 +63,30 @@ const AdminDashboard = ({ onClose }) => {
     { id: 5, company: '(주)아모레퍼시픽', ceo: '서민지', date: '2026-01-26', phone: '02-5678-9012', email: 'seo@amore.com', summary: '사회공헌 연계 고용 프로그램 문의합니다.', content: 'ESG 경영 차원에서 장애인 고용과 연계한 사회공헌 프로그램을 기획 중입니다. 협업 가능 여부를 확인하고 싶습니다.' },
     { id: 6, company: '(주)롯데마트', ceo: '한상우', date: '2026-01-25', phone: '02-6789-0123', email: 'han@lotte.com', summary: '매장 내 직무 배치 가능 여부가 궁금합니다.', content: '서울 시내 매장에 장애인 근로자를 배치할 수 있는 직무가 있는지 상담받고 싶습니다.' },
   ]);
+
+  // 신규 문의 데이터 병합 (StrictMode 중복 방지)
+  const mergedRef = useRef(false);
+  useEffect(() => {
+    if (!mergedRef.current && newInquiries && newInquiries.length > 0) {
+      mergedRef.current = true;
+      setInquiryList(prev => {
+        const maxId = prev.reduce((max, item) => Math.max(max, item.id), 0);
+        const mapped = newInquiries.map((inq, idx) => ({
+          id: maxId + idx + 1,
+          company: inq.company,
+          ceo: inq.ceo,
+          date: inq.date,
+          phone: inq.phone,
+          email: inq.email,
+          summary: inq.summary,
+          content: inq.content
+        }));
+        return [...mapped, ...prev];
+      });
+      if (clearNewInquiries) clearNewInquiries();
+    }
+  }, []);
+
   const [companiesData, setCompaniesData] = useState([
     { id: 1, name: '(주)두루빛 제조', industry: '제조업', location: '서울 강남구', workers: 15, contractEnd: '2026-12-31', status: 'active', revenue: 4500000 },
     { id: 2, name: '세종식품', industry: '식품가공', location: '경기 성남시', workers: 12, contractEnd: '2026-03-15', status: 'expiring', revenue: 3600000 },
@@ -444,10 +469,6 @@ const AdminDashboard = ({ onClose }) => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
               <span className="text-sm text-gray-600">2026년 1월 28일</span>
               <div className="w-10 h-10 bg-duru-orange-100 rounded-full flex items-center justify-center">
                 <span className="text-sm font-bold text-duru-orange-600">관</span>
@@ -472,15 +493,23 @@ const AdminDashboard = ({ onClose }) => {
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 py-4 px-2 border-b-2 transition-colors whitespace-nowrap ${
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (tab.id === 'notifications') setHasNewNotification(false);
+                }}
+                className={`relative flex items-center gap-2 py-4 px-2 border-b-2 transition-colors whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'border-duru-orange-500 text-duru-orange-600'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
               >
                 <tab.icon className="w-5 h-5" />
-                <span className="font-semibold">{tab.label}</span>
+                <span className="relative font-semibold">
+                  {tab.label}
+                  {tab.id === 'notifications' && hasNewNotification && (
+                    <span className="absolute -top-1 -right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
+                </span>
               </button>
             ))}
           </div>
@@ -800,7 +829,7 @@ const AdminDashboard = ({ onClose }) => {
                       <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
                           <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">이름</th>
-                          <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">부서</th>
+                          <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">전화번호</th>
                           <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">상태</th>
                           <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">출근 시간</th>
                           <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">퇴근 시간</th>
@@ -823,7 +852,7 @@ const AdminDashboard = ({ onClose }) => {
                                 )}
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-gray-700">{worker.department}</td>
+                            <td className="px-6 py-4 text-gray-700">{worker.phone}</td>
                             <td className="px-6 py-4">
                               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(status)}`}>
                                 {status}
@@ -984,76 +1013,68 @@ const AdminDashboard = ({ onClose }) => {
                       {company.status === 'active' ? '계약중' : '만료임박'}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm text-gray-600">업종</p>
-                      <p className="font-semibold text-gray-900">{company.industry}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">위치</p>
-                      <p className="font-semibold text-gray-900">{company.location}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">근로자 수</p>
-                      <p className="font-semibold text-gray-900">{company.workers}명</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">계약만료</p>
-                      <p className="font-semibold text-gray-900">{company.contractEnd}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">월 정산액</p>
-                      {editingRevenue === company.id ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-gray-700">₩</span>
-                          <input
-                            type="number"
-                            value={revenueEditValue}
-                            onChange={(e) => setRevenueEditValue(e.target.value)}
-                            placeholder="0"
-                            className="w-20 px-2 py-1 border-2 border-duru-orange-500 rounded-lg text-base font-bold text-blue-600 focus:outline-none focus:ring-2 focus:ring-duru-orange-500 text-right"
-                            autoFocus
-                          />
-                          <span className="text-sm font-semibold text-gray-700">만</span>
+                  <div className="flex items-center gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 flex-1">
+                      <div>
+                        <p className="text-sm text-gray-600">업종</p>
+                        <p className="font-semibold text-gray-900">{company.industry}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">위치</p>
+                        <p className="font-semibold text-gray-900">{company.location}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">근로자 수</p>
+                        <p className="font-semibold text-gray-900">{company.workers}명</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">계약만료</p>
+                        <p className="font-semibold text-gray-900">{company.contractEnd}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">월 정산액</p>
+                        {editingRevenue === company.id ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-gray-700">₩</span>
+                            <input
+                              type="number"
+                              value={revenueEditValue}
+                              onChange={(e) => setRevenueEditValue(e.target.value)}
+                              placeholder="0"
+                              className="w-20 px-2 py-1 border-2 border-duru-orange-500 rounded-lg text-base font-bold text-blue-600 focus:outline-none focus:ring-2 focus:ring-duru-orange-500 text-right"
+                              autoFocus
+                            />
+                            <span className="text-sm font-semibold text-gray-700">만</span>
+                            <button
+                              onClick={() => saveRevenueEdit(company.id)}
+                              className="p-1 hover:bg-green-100 rounded transition-colors"
+                            >
+                              <Check className="w-4 h-4 text-green-600" />
+                            </button>
+                            <button
+                              onClick={cancelRevenueEdit}
+                              className="p-1 hover:bg-red-100 rounded transition-colors"
+                            >
+                              <X className="w-4 h-4 text-red-600" />
+                            </button>
+                          </div>
+                        ) : (
                           <button
-                            onClick={() => saveRevenueEdit(company.id)}
-                            className="p-1 hover:bg-green-100 rounded transition-colors"
+                            onClick={() => startRevenueEdit(company.id, company.revenue)}
+                            className="group flex items-center gap-1 hover:bg-gray-50 rounded transition-colors -ml-2"
                           >
-                            <Check className="w-4 h-4 text-green-600" />
+                            <p className="font-semibold text-blue-600">₩{(company.revenue / 10000).toFixed(0)}만</p>
+                            <Edit className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                           </button>
-                          <button
-                            onClick={cancelRevenueEdit}
-                            className="p-1 hover:bg-red-100 rounded transition-colors"
-                          >
-                            <X className="w-4 h-4 text-red-600" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => startRevenueEdit(company.id, company.revenue)}
-                          className="group flex items-center gap-1 hover:bg-gray-50 rounded transition-colors -ml-2"
-                        >
-                          <p className="font-semibold text-blue-600">₩{(company.revenue / 10000).toFixed(0)}만</p>
-                          <Edit className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </button>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => setSelectedCompany(company)}
-                      className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-2"
+                      className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-2 shrink-0"
                     >
                       <Eye className="w-4 h-4" />
                       상세보기
-                    </button>
-                    <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center gap-2">
-                      <Edit className="w-4 h-4" />
-                      수정
-                    </button>
-                    <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center gap-2">
-                      <MessageSquare className="w-4 h-4" />
-                      연락
                     </button>
                   </div>
                 </div>
@@ -1088,7 +1109,7 @@ const AdminDashboard = ({ onClose }) => {
                     <tr>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">이름</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">회사</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">부서</th>
+                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">전화번호</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">장애유형</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">계약만료</th>
                       <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">상태</th>
@@ -1110,7 +1131,7 @@ const AdminDashboard = ({ onClose }) => {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-gray-900">{worker.company}</td>
-                        <td className="px-6 py-4 text-gray-900">{worker.department}</td>
+                        <td className="px-6 py-4 text-gray-900">{worker.phone}</td>
                         <td className="px-6 py-4 text-gray-600">{worker.disability}</td>
                         <td className="px-6 py-4 text-gray-900">{worker.contractEnd}</td>
                         <td className="px-6 py-4">
@@ -1240,6 +1261,7 @@ const AdminDashboard = ({ onClose }) => {
                             <thead className="bg-duru-orange-50">
                               <tr>
                                 <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">이름</th>
+                                <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">전화번호</th>
                                 <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">근무요일</th>
                                 <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">출근 일수</th>
                                 <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">총 근무시간</th>
@@ -1249,6 +1271,7 @@ const AdminDashboard = ({ onClose }) => {
                               {companyWorkers.map((worker, index) => (
                                 <tr key={worker.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                   <td className="px-4 py-3 font-semibold text-gray-900 border border-gray-300">{worker.name}</td>
+                                  <td className="px-4 py-3 text-gray-700 border border-gray-300">{worker.phone}</td>
                                   <td className="px-4 py-3 text-center text-gray-700 border border-gray-300">{worker.workSchedule}</td>
                                   <td className="px-4 py-3 text-center text-gray-900 border border-gray-300">
                                     {editingPreviewCell?.companyName === companyName &&
@@ -1775,6 +1798,7 @@ const AdminDashboard = ({ onClose }) => {
                   <thead className="bg-duru-orange-50">
                     <tr>
                       <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">이름</th>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">전화번호</th>
                       <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">근무요일</th>
                       <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">출근 일수</th>
                       <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">총 근무시간</th>
@@ -1784,6 +1808,7 @@ const AdminDashboard = ({ onClose }) => {
                     {printPreview.workers.map((worker, index) => (
                       <tr key={worker.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="px-4 py-3 font-semibold text-gray-900 border border-gray-300">{worker.name}</td>
+                        <td className="px-4 py-3 text-gray-700 border border-gray-300">{worker.phone}</td>
                         <td className="px-4 py-3 text-center text-gray-700 border border-gray-300">{worker.workSchedule}</td>
                         <td className="px-4 py-3 text-center text-gray-900 border border-gray-300">{worker.workDays}일</td>
                         <td className="px-4 py-3 text-center font-bold text-blue-600 border border-gray-300">{worker.totalHours}h</td>
