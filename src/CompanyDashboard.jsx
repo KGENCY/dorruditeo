@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Users, UserCheck, UserX, Clock, Calendar, TrendingUp, FileText, Search, ChevronLeft, ChevronRight, Download, Upload, Eye, X, Plus, Check, CheckCircle2, Hash, Lock, ChevronDown, Phone, Shield, Heart, Briefcase } from 'lucide-react';
+import { ArrowLeft, Users, UserCheck, UserX, Clock, Calendar, TrendingUp, FileText, Search, ChevronLeft, ChevronRight, Download, Upload, Eye, X, Plus, Check, CheckCircle2, Hash, Lock, ChevronDown, Phone, Shield, Heart, Briefcase, MessageSquare, Bell, Edit } from 'lucide-react';
 import EmployeeDetail from './EmployeeDetail';
 
 const CompanyDashboard = ({ onClose }) => {
-  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, employees, attendance, stats
+  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, employees, attendance, notices, stats
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date(2026, 0, 1)); // 2026년 1월
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 0, 28)); // 2026년 1월 28일
@@ -30,6 +30,28 @@ const CompanyDashboard = ({ onClose }) => {
     workerId: '',
   });
   const [addWorkerComplete, setAddWorkerComplete] = useState({});
+
+  // 공지사항 관련 상태
+  const [selectedWorkersForNotice, setSelectedWorkersForNotice] = useState([]);
+  const [noticeContent, setNoticeContent] = useState('');
+  const [workerSearchQuery, setWorkerSearchQuery] = useState('');
+  const [sentNotices, setSentNotices] = useState([
+    {
+      id: 1,
+      date: '2026-01-28 14:30',
+      workers: ['김민수', '이영희', '박철수', '정미라', '최동욱'],
+      content: '내일 오전 10시에 안전교육이 진행됩니다.\n필히 참석 부탁드립니다.',
+      sender: '관리자'
+    },
+    {
+      id: 2,
+      date: '2026-01-25 09:00',
+      workers: ['김민수', '이영희'],
+      content: '금일 제조부 근무시간이 1시간 연장됩니다.',
+      sender: '관리자'
+    }
+  ]);
+  const [expandedNotices, setExpandedNotices] = useState(new Set());
 
   const updateAddWorkerForm = (field, value) => {
     const newForm = { ...addWorkerForm, [field]: value };
@@ -63,6 +85,66 @@ const CompanyDashboard = ({ onClose }) => {
     setShowAddWorkerModal(false);
     setAddWorkerForm({ name: '', ssn: '', phone: '', gender: '', emergencyName: '', emergencyRelation: '', emergencyPhone: '', disabilityType: '', disabilitySeverity: '', hireDate: '', recognitionDate: '', workDays: [], workStartTime: '', workerId: '' });
     setAddWorkerComplete({});
+  };
+
+  // 공지사항 함수들
+  const toggleWorkerForNotice = (workerId) => {
+    setSelectedWorkersForNotice(prev =>
+      prev.includes(workerId)
+        ? prev.filter(id => id !== workerId)
+        : [...prev, workerId]
+    );
+  };
+
+  const toggleAllWorkersForNotice = () => {
+    if (selectedWorkersForNotice.length === employees.length) {
+      setSelectedWorkersForNotice([]);
+    } else {
+      setSelectedWorkersForNotice(employees.map(e => e.id));
+    }
+  };
+
+  const toggleNoticeExpand = (noticeId) => {
+    setExpandedNotices(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(noticeId)) {
+        newSet.delete(noticeId);
+      } else {
+        newSet.add(noticeId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSendNotice = () => {
+    if (selectedWorkersForNotice.length === 0 || !noticeContent.trim()) {
+      return;
+    }
+
+    const selectedWorkerNames = employees
+      .filter(e => selectedWorkersForNotice.includes(e.id))
+      .map(e => e.name);
+
+    const newNotice = {
+      id: Date.now(),
+      date: new Date().toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).replace(/\. /g, '-').replace('.', ''),
+      workers: selectedWorkerNames,
+      content: noticeContent,
+      sender: '관리자'
+    };
+
+    setSentNotices(prev => [newNotice, ...prev]);
+    setSelectedWorkersForNotice([]);
+    setNoticeContent('');
+    setWorkerSearchQuery('');
+    alert('공지사항이 성공적으로 발송되었습니다!');
   };
 
   const disabilityTypes = [
@@ -181,6 +263,7 @@ const CompanyDashboard = ({ onClose }) => {
               { id: 'dashboard', label: '대시보드', icon: TrendingUp },
               { id: 'employees', label: '근로자 관리', icon: Users },
               { id: 'attendance', label: '근무일정관리', icon: Clock },
+              { id: 'notices', label: '공지사항', icon: MessageSquare },
               { id: 'stats', label: '통계', icon: Calendar }
             ].map(tab => (
               <button
@@ -575,6 +658,213 @@ const CompanyDashboard = ({ onClose }) => {
                     <p className="text-2xl font-bold text-gray-900">8시간</p>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'notices' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <MessageSquare className="w-7 h-7 text-duru-orange-600" />
+                공지사항 관리
+              </h2>
+            </div>
+
+            {/* 공지사항 발송 섹션 */}
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <Bell className="w-6 h-6 text-duru-orange-600" />
+                새 공지사항 발송
+              </h3>
+
+              {/* 근로자 선택 */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-duru-orange-600" />
+                    발송 대상 근로자
+                  </h4>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={toggleAllWorkersForNotice}
+                      className="px-4 py-2 bg-duru-orange-50 text-duru-orange-600 rounded-lg font-semibold hover:bg-duru-orange-100 transition-colors border border-duru-orange-200 text-sm"
+                    >
+                      {selectedWorkersForNotice.length === employees.length ? '전체 해제' : '전체 선택'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* 검색 바 */}
+                <div className="relative mb-4">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="이름, 전화번호로 검색..."
+                    value={workerSearchQuery}
+                    onChange={(e) => setWorkerSearchQuery(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                  />
+                </div>
+
+                {/* 근로자 목록 */}
+                <div className="border-2 border-gray-200 rounded-lg max-h-72 overflow-y-auto">
+                  {employees
+                    .filter(worker =>
+                      worker.name.toLowerCase().includes(workerSearchQuery.toLowerCase()) ||
+                      worker.phone.includes(workerSearchQuery) ||
+                      worker.disability.toLowerCase().includes(workerSearchQuery.toLowerCase())
+                    )
+                    .map((worker, index, array) => (
+                      <label
+                        key={worker.id}
+                        className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
+                          selectedWorkersForNotice.includes(worker.id)
+                            ? 'bg-duru-orange-50'
+                            : 'hover:bg-gray-50'
+                        } ${index !== array.length - 1 ? 'border-b border-gray-200' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedWorkersForNotice.includes(worker.id)}
+                          onChange={() => toggleWorkerForNotice(worker.id)}
+                          className="w-5 h-5 text-duru-orange-600 rounded focus:ring-duru-orange-500"
+                        />
+                        <div className="w-10 h-10 bg-duru-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm font-bold text-duru-orange-600">{worker.name[0]}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 truncate">{worker.name}</p>
+                          <p className="text-sm text-gray-600 truncate">{worker.disability} · {worker.phone}</p>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            worker.status === 'checkin' ? 'bg-green-100 text-green-700' :
+                            worker.status === 'checkout' ? 'bg-gray-200 text-gray-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {worker.status === 'checkin' ? '근무중' : worker.status === 'checkout' ? '퇴근' : '결근'}
+                          </span>
+                        </div>
+                      </label>
+                    ))
+                  }
+                  {employees.filter(worker =>
+                    worker.name.toLowerCase().includes(workerSearchQuery.toLowerCase()) ||
+                    worker.phone.includes(workerSearchQuery) ||
+                    worker.disability.toLowerCase().includes(workerSearchQuery.toLowerCase())
+                  ).length === 0 && (
+                    <div className="px-4 py-8 text-center text-gray-400">
+                      검색 결과가 없습니다
+                    </div>
+                  )}
+                </div>
+
+                {/* 선택 요약 */}
+                {selectedWorkersForNotice.length > 0 && (
+                  <div className="mt-4 bg-duru-orange-50 rounded-lg p-4 border border-duru-orange-200">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-gray-900">선택된 근로자</p>
+                      <p className="text-lg font-bold text-duru-orange-600">
+                        {selectedWorkersForNotice.length}명
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 공지사항 작성 */}
+              <div className="mb-6">
+                <h4 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <Edit className="w-5 h-5 text-duru-orange-600" />
+                  공지사항 내용
+                </h4>
+                <textarea
+                  value={noticeContent}
+                  onChange={(e) => setNoticeContent(e.target.value)}
+                  placeholder="근로자들에게 전달할 공지사항을 작성해주세요.&#10;&#10;예)&#10;내일 오전 안전교육이 진행됩니다.&#10;필히 참석 부탁드립니다."
+                  rows={6}
+                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent resize-none placeholder:text-gray-400 leading-relaxed"
+                />
+              </div>
+
+              {/* 발송 버튼 */}
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setSelectedWorkersForNotice([]);
+                    setNoticeContent('');
+                    setWorkerSearchQuery('');
+                  }}
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  초기화
+                </button>
+                <button
+                  onClick={handleSendNotice}
+                  disabled={selectedWorkersForNotice.length === 0 || !noticeContent.trim()}
+                  className="px-8 py-3 bg-duru-orange-500 text-white rounded-lg font-bold text-lg hover:bg-duru-orange-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <Bell className="w-5 h-5" />
+                  발송하기
+                </button>
+              </div>
+            </div>
+
+            {/* 발송 기록 섹션 */}
+            <div className="bg-white rounded-xl border border-gray-200">
+              <div className="px-6 py-5 border-b border-gray-200">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-6 h-6 text-duru-orange-600" />
+                  발송 기록
+                </h3>
+              </div>
+
+              <div className="divide-y divide-gray-200">
+                {sentNotices.length === 0 ? (
+                  <div className="px-6 py-12 text-center">
+                    <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-400">발송한 공지사항이 없습니다</p>
+                  </div>
+                ) : (
+                  sentNotices.map((notice) => {
+                    const isExpanded = expandedNotices.has(notice.id);
+                    const displayedWorkers = isExpanded ? notice.workers : notice.workers.slice(0, 3);
+
+                    return (
+                      <div key={notice.id} className="px-6 py-5 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-sm font-semibold text-duru-orange-600">{notice.date}</span>
+                              <span className="text-sm text-gray-500">발송자: {notice.sender}</span>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap mb-3">
+                              <span className="text-sm font-semibold text-gray-700">발송 대상:</span>
+                              {displayedWorkers.map((worker, idx) => (
+                                <span key={idx} className="inline-flex items-center px-2.5 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium">
+                                  {worker}
+                                </span>
+                              ))}
+                              {notice.workers.length > 3 && (
+                                <button
+                                  onClick={() => toggleNoticeExpand(notice.id)}
+                                  className="inline-flex items-center px-2.5 py-1 bg-duru-orange-100 text-duru-orange-700 rounded-md text-sm font-semibold hover:bg-duru-orange-200 transition-colors"
+                                >
+                                  {isExpanded ? '접기' : `+${notice.workers.length - 3}명 더보기`}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <p className="text-gray-900 whitespace-pre-line leading-relaxed">{notice.content}</p>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>
