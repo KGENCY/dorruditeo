@@ -3,7 +3,7 @@ import { ArrowLeft, Users, UserCheck, UserX, Clock, Calendar, TrendingUp, FileTe
 import EmployeeDetail from './EmployeeDetail';
 
 const CompanyDashboard = ({ onClose }) => {
-  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, employees, attendance, notices, stats
+  const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, employees, attendance, notices
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date(2026, 0, 1)); // 2026년 1월
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 0, 28)); // 2026년 1월 28일
@@ -285,8 +285,7 @@ const CompanyDashboard = ({ onClose }) => {
               { id: 'dashboard', label: '대시보드', icon: TrendingUp },
               { id: 'employees', label: '근로자 관리', icon: Users },
               { id: 'attendance', label: '근무일정관리', icon: Clock },
-              { id: 'notices', label: '공지사항', icon: MessageSquare },
-              { id: 'stats', label: '통계', icon: Calendar }
+              { id: 'notices', label: '공지사항', icon: MessageSquare }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -885,14 +884,6 @@ const CompanyDashboard = ({ onClose }) => {
                 )}
               </div>
             </div>
-          </div>
-        )}
-
-        {activeTab === 'stats' && (
-          <div className="bg-white rounded-xl p-8 border border-gray-200 text-center">
-            <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">통계 및 리포트</h3>
-            <p className="text-gray-600">월별/주별 출근율과 근무시간 통계를 확인할 수 있습니다.</p>
           </div>
         )}
       </div>
