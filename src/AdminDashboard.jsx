@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Users, Building2, TrendingUp, AlertCircle, DollarSign, FileText, Search, Bell, Calendar, UserCheck, Clock, ChevronRight, Edit, Eye, Download, Upload, Filter, Save, X, Check, ChevronDown, ChevronUp, BarChart3, Printer, Lock, CheckCircle2, Mail, Phone, MapPin, User } from 'lucide-react';
+import { ArrowLeft, Users, Building2, TrendingUp, AlertCircle, DollarSign, FileText, Search, Bell, Calendar, UserCheck, Clock, ChevronRight, Edit, Eye, Download, Upload, Filter, Save, X, Check, ChevronDown, ChevronUp, BarChart3, Printer, Lock, CheckCircle2, Mail, Phone, MapPin, User, Copy, FileDown } from 'lucide-react';
 import AdminWorkerDetail from './AdminWorkerDetail';
 import CompanyDetail from './CompanyDetail';
 
@@ -34,6 +34,7 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
   const [revenueEditValue, setRevenueEditValue] = useState('');
   const [hasNewNotification, setHasNewNotification] = useState(true);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
+  const [copiedEmail, setCopiedEmail] = useState(false);
   const [inquiryList, setInquiryList] = useState([
     { id: 1, company: '(주)삼성전자', ceo: '홍길동', date: '2026-01-30', phone: '02-1234-5678', email: 'hong@samsung.com', summary: '장애인 고용 관련 상담을 받고 싶습니다.', content: '현재 장애인 고용 의무 비율 관련하여 채용 및 관리 프로세스 상담을 받고 싶습니다. 특히 제조 현장에 적합한 직무 배치 방안이 궁금합니다.' },
     { id: 2, company: '(주)현대자동차', ceo: '김철수', date: '2026-01-29', phone: '02-2345-6789', email: 'kim@hyundai.com', summary: '파견 근로자 배치 문의드립니다.', content: '울산 공장 내 경포장 라인에 장애인 근로자 파견을 검토하고 있습니다. 가능한 인원과 절차가 궁금합니다.' },
@@ -67,11 +68,11 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
   }, []);
 
   const [companiesData, setCompaniesData] = useState([
-    { id: 1, name: '(주)두루빛 제조', industry: '제조업', location: '서울 강남구', workers: 15, contractEnd: '2026-12-31', status: 'active', revenue: 4500000 },
-    { id: 2, name: '세종식품', industry: '식품가공', location: '경기 성남시', workers: 12, contractEnd: '2026-03-15', status: 'expiring', revenue: 3600000 },
-    { id: 3, name: '한빛포장', industry: '포장/물류', location: '인천 남동구', workers: 18, contractEnd: '2027-06-30', status: 'active', revenue: 5400000 },
-    { id: 4, name: '그린팜', industry: '농업', location: '충남 천안시', workers: 8, contractEnd: '2026-02-28', status: 'expiring', revenue: 2400000 },
-    { id: 5, name: '참좋은케어', industry: '서비스업', location: '서울 송파구', workers: 10, contractEnd: '2026-09-15', status: 'active', revenue: 3000000 },
+    { id: 1, name: '(주)두루빛 제조', industry: '제조업', location: '서울 강남구', workers: 15, contractEnd: '2026-12-31', status: 'active', revenue: 4500000, pm: { name: '김영업', phone: '010-1111-2222', email: 'sales.kim@duruviter.com' } },
+    { id: 2, name: '세종식품', industry: '식품가공', location: '경기 성남시', workers: 12, contractEnd: '2026-03-15', status: 'expiring', revenue: 3600000, pm: { name: '박담당', phone: '010-2222-3333', email: 'sales.park@duruviter.com' } },
+    { id: 3, name: '한빛포장', industry: '포장/물류', location: '인천 남동구', workers: 18, contractEnd: '2027-06-30', status: 'active', revenue: 5400000, pm: { name: '이매니저', phone: '010-3333-4444', email: 'sales.lee@duruviter.com' } },
+    { id: 4, name: '그린팜', industry: '농업', location: '충남 천안시', workers: 8, contractEnd: '2026-02-28', status: 'expiring', revenue: 2400000, pm: { name: '최영업', phone: '010-4444-5555', email: 'sales.choi@duruviter.com' } },
+    { id: 5, name: '참좋은케어', industry: '서비스업', location: '서울 송파구', workers: 10, contractEnd: '2026-09-15', status: 'active', revenue: 3000000, pm: { name: '정담당', phone: '010-5555-6666', email: 'sales.jung@duruviter.com' } },
   ]);
 
   const updateAddCompanyForm = (field, value) => {
@@ -1002,7 +1003,8 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setPrintPreview({ companyName, workers: companyWorkers });
+                              const company = companiesData.find(c => c.name === companyName);
+                              setPrintPreview({ companyName, workers: companyWorkers, pm: company?.pm || null });
                             }}
                             className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-2"
                           >
@@ -1329,25 +1331,68 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
       {printPreview && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">인쇄 프리뷰</h2>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    window.print();
-                  }}
-                  className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-2"
-                >
-                  <Printer className="w-4 h-4" />
-                  인쇄
-                </button>
-                <button
-                  onClick={() => setPrintPreview(null)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-600" />
-                </button>
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-bold text-gray-900">인쇄 프리뷰</h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      window.print();
+                    }}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center gap-2"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    PDF로 저장
+                  </button>
+                  <button
+                    onClick={() => {
+                      window.print();
+                    }}
+                    className="px-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-2"
+                  >
+                    <Printer className="w-4 h-4" />
+                    인쇄
+                  </button>
+                  <button
+                    onClick={() => setPrintPreview(null)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-600" />
+                  </button>
+                </div>
               </div>
+              {printPreview.pm && (
+                <div className="flex items-center gap-4 text-sm bg-duru-orange-50 rounded-lg px-4 py-2">
+                  <span className="font-semibold text-duru-orange-600">담당자</span>
+                  <div className="flex items-center gap-1 text-gray-700">
+                    <User className="w-4 h-4 text-gray-500" />
+                    {printPreview.pm.name}
+                  </div>
+                  <div className="flex items-center gap-1 text-gray-700">
+                    <Phone className="w-4 h-4 text-gray-500" />
+                    {printPreview.pm.phone}
+                  </div>
+                  <div className="flex items-center gap-1 text-gray-700">
+                    <Mail className="w-4 h-4 text-gray-500" />
+                    <span>{printPreview.pm.email}</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(printPreview.pm.email);
+                        setCopiedEmail(true);
+                        setTimeout(() => setCopiedEmail(false), 2000);
+                      }}
+                      className="ml-1 p-1 hover:bg-duru-orange-100 rounded transition-colors"
+                      title="이메일 복사"
+                    >
+                      {copiedEmail ? (
+                        <Check className="w-3 h-3 text-green-600" />
+                      ) : (
+                        <Copy className="w-3 h-3 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="p-8" id="print-content">
