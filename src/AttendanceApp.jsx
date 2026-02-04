@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Hash, LogIn, Clock, CheckCircle2, Home, Megaphone, AlertTriangle, Smile, Camera, X, ImagePlus, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Hash, LogIn, Clock, CheckCircle2, Home, Megaphone, AlertTriangle, Smile, Camera, X, ImagePlus, ChevronDown, ChevronUp, Calendar, ChevronLeft, ChevronRight, FileText, Save, Trash2 } from 'lucide-react';
 
 const AttendanceApp = ({ onClose }) => {
   const [step, setStep] = useState('login'); // login, main, checkin, checkout, complete
@@ -16,6 +16,10 @@ const AttendanceApp = ({ onClose }) => {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showPastNotices, setShowPastNotices] = useState(false);
   const [attendanceType, setAttendanceType] = useState(''); // checkin or checkout
+  const [showWorkRecords, setShowWorkRecords] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   // 금일 긴급 공지 더미 데이터 (실제로는 서버에서 받아올 데이터)
   const [todayNotices] = useState([
@@ -40,6 +44,63 @@ const AttendanceApp = ({ onClose }) => {
       date: '2025.08.17',
       content: '폭염 예보로 인해 금일 자택 대기 바랍니다.',
       sender: '두루빛터 관리자'
+    }
+  ]);
+
+  // 업무 기록 더미 데이터 (실제로는 서버에서 받아올 데이터)
+  const [workRecords, setWorkRecords] = useState([
+    {
+      id: 1,
+      date: '2026-02-03',
+      type: 'checkout',
+      workDone: '제품 포장 작업 50개 완료, 부품 조립 30개 완료, 작업장 정리정돈',
+      photos: [
+        { id: 1, url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400', name: 'work1.jpg' },
+        { id: 2, url: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400', name: 'work2.jpg' }
+      ],
+      timestamp: '2026-02-03T18:30:00'
+    },
+    {
+      id: 2,
+      date: '2026-02-03',
+      type: 'checkin',
+      confirmedTask: '오늘은 제품 포장 작업과\n부품 조립 작업을 진행할 예정입니다.',
+      timestamp: '2026-02-03T09:00:00'
+    },
+    {
+      id: 3,
+      date: '2026-02-01',
+      type: 'checkout',
+      workDone: '재고 정리 및 창고 정돈, 제품 검수 작업',
+      photos: [
+        { id: 3, url: 'https://images.unsplash.com/photo-1553413077-190dd305871c?w=400', name: 'work3.jpg' }
+      ],
+      timestamp: '2026-02-01T17:45:00'
+    },
+    {
+      id: 4,
+      date: '2026-01-30',
+      type: 'checkout',
+      workDone: '신제품 포장 작업, 라벨 부착 작업',
+      photos: [],
+      timestamp: '2026-01-30T18:00:00'
+    },
+    {
+      id: 5,
+      date: '2026-01-28',
+      type: 'checkin',
+      confirmedTask: '창고 정리 및 재고 정리 작업을 진행합니다.',
+      timestamp: '2026-01-28T09:15:00'
+    },
+    {
+      id: 6,
+      date: '2025-12-20',
+      type: 'checkout',
+      workDone: '연말 재고 조사, 불량품 분류 작업',
+      photos: [
+        { id: 4, url: 'https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=400', name: 'work4.jpg' }
+      ],
+      timestamp: '2025-12-20T18:30:00'
     }
   ]);
 
@@ -80,6 +141,55 @@ const AttendanceApp = ({ onClose }) => {
 
   const removePhoto = (id) => {
     setPhotos((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  // 업무 기록에서 사진 삭제
+  const deletePhotoFromRecord = (recordId) => {
+    setWorkRecords((prev) =>
+      prev.map((record) =>
+        record.id === recordId
+          ? { ...record, photos: [] }
+          : record
+      )
+    );
+  };
+
+  // 업무 기록에 사진 추가
+  const addPhotoToRecord = (recordId, e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const newPhotos = files.map((file) => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      url: URL.createObjectURL(file)
+    }));
+
+    setWorkRecords((prev) =>
+      prev.map((record) =>
+        record.id === recordId
+          ? { ...record, photos: [...(record.photos || []), ...newPhotos] }
+          : record
+      )
+    );
+  };
+
+  // 사진 저장 (다운로드)
+  const savePhoto = async (photo) => {
+    try {
+      const response = await fetch(photo.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = photo.name;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('사진 저장 실패:', error);
+    }
   };
 
 
@@ -144,6 +254,42 @@ const AttendanceApp = ({ onClose }) => {
 
   // 메인 페이지 (출근/퇴근 선택)
   if (step === 'main') {
+    // 선택된 연도/월에 해당하는 업무 기록 필터링 (퇴근 기록만)
+    const filteredRecords = workRecords
+      .filter((record) => record.type === 'checkout')
+      .filter((record) => {
+        const recordDate = new Date(record.date);
+        return recordDate.getFullYear() === selectedYear && recordDate.getMonth() + 1 === selectedMonth;
+      });
+
+    // 연도 변경 핸들러
+    const handlePrevYear = () => {
+      setSelectedYear(prev => prev - 1);
+    };
+
+    const handleNextYear = () => {
+      setSelectedYear(prev => prev + 1);
+    };
+
+    // 월 변경 핸들러
+    const handlePrevMonth = () => {
+      if (selectedMonth === 1) {
+        setSelectedMonth(12);
+        setSelectedYear(prev => prev - 1);
+      } else {
+        setSelectedMonth(prev => prev - 1);
+      }
+    };
+
+    const handleNextMonth = () => {
+      if (selectedMonth === 12) {
+        setSelectedMonth(1);
+        setSelectedYear(prev => prev + 1);
+      } else {
+        setSelectedMonth(prev => prev + 1);
+      }
+    };
+
     return (
       <div className="min-h-screen bg-duru-ivory">
         <div className="max-w-4xl mx-auto p-4 sm:p-8">
@@ -259,6 +405,202 @@ const AttendanceApp = ({ onClose }) => {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* 섹션 3. 나의 활동 기록 */}
+          <div className="mt-6">
+            {/* 트리거 카드 */}
+            <button
+              onClick={() => setShowWorkRecords(!showWorkRecords)}
+              className="w-full bg-gradient-to-b from-[#F7F7F8] to-[#F1F1F3] rounded-2xl px-5 py-3.5 border border-[#E2E2E6] shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex items-center justify-between hover:from-[#F3F3F5] hover:to-[#EDEDEF] transition-colors"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 bg-duru-orange-100 rounded-full flex items-center justify-center">
+                  <FileText className="w-3.5 h-3.5 text-duru-orange-600" />
+                </div>
+                <span className="text-sm text-gray-500 font-normal">나의 활동 기록</span>
+              </div>
+              <span className="flex items-center gap-1 text-xs text-gray-500">
+                {showWorkRecords ? '접기' : '모두 보기'}
+                {showWorkRecords
+                  ? <ChevronUp className="w-3.5 h-3.5" />
+                  : <ChevronDown className="w-3.5 h-3.5" />
+                }
+              </span>
+            </button>
+
+            {/* 펼쳐지는 활동 기록 리스트 */}
+            {showWorkRecords && (
+              <div className="mt-2 bg-gradient-to-b from-gray-50 to-white rounded-2xl px-5 py-5 border border-gray-100">
+                {/* 연도/월 선택 네비게이션 */}
+                <div className="mb-4 space-y-3">
+                  {/* 연도 선택 */}
+                  <div className="flex items-center justify-between bg-white rounded-xl px-4 py-3 border border-gray-200">
+                    <button
+                      onClick={handlePrevYear}
+                      className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-gray-600" />
+                    </button>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-blue-600" />
+                      <span className="text-base font-bold text-gray-900">{selectedYear}년</span>
+                    </div>
+                    <button
+                      onClick={handleNextYear}
+                      className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4 text-gray-600" />
+                    </button>
+                  </div>
+
+                  {/* 월 선택 */}
+                  <div className="flex items-center justify-between bg-white rounded-xl px-4 py-3 border border-gray-200">
+                    <button
+                      onClick={handlePrevMonth}
+                      className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-gray-600" />
+                    </button>
+                    <span className="text-base font-bold text-gray-900">{selectedMonth}월</span>
+                    <button
+                      onClick={handleNextMonth}
+                      className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 기록 카드들 */}
+                {filteredRecords.length > 0 ? (
+                  <div className="space-y-3">
+                    {filteredRecords.map((record) => (
+                      <div key={record.id} className="bg-white rounded-xl p-5 border border-duru-orange-100 hover:border-duru-orange-300 hover:shadow-md transition-all">
+                        {/* 날짜 헤더 */}
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-duru-orange-50 rounded-lg">
+                            <CheckCircle2 className="w-4 h-4 text-duru-orange-600" />
+                            <span className="text-sm font-bold text-duru-orange-700">퇴근</span>
+                          </div>
+                          <span className="text-sm font-semibold text-gray-700">
+                            {new Date(record.timestamp).toLocaleDateString('ko-KR', {
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {new Date(record.timestamp).toLocaleTimeString('ko-KR', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+
+                        {/* 업무 내용 */}
+                        <div className="bg-[#FFF4EC] rounded-xl p-4 mb-3">
+                          <p className="text-xs text-duru-orange-600 font-bold mb-2">오늘 한 일</p>
+                          <p className="text-base text-gray-800 font-medium leading-relaxed">
+                            {record.workDone}
+                          </p>
+                        </div>
+
+                        {/* 사진 (한 장만 표시) */}
+                        {record.photos && record.photos.length > 0 && (
+                          <div>
+                            <p className="text-xs text-gray-500 font-semibold mb-2.5 flex items-center gap-1.5">
+                              <Camera className="w-3.5 h-3.5" />
+                              활동 사진
+                            </p>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => setSelectedPhoto(record.photos[0])}
+                                className="relative w-32 h-32 rounded-xl overflow-hidden border-2 border-gray-200 hover:border-gray-300 transition-all hover:shadow-lg group"
+                              >
+                                <img
+                                  src={record.photos[0].url}
+                                  alt={record.photos[0].name}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
+                              </button>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={() => savePhoto(record.photos[0])}
+                                  className="p-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center"
+                                  title="저장"
+                                >
+                                  <Save className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => deletePhotoFromRecord(record.id)}
+                                  className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center"
+                                  title="삭제"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {/* 사진이 없을 때 추가 버튼 */}
+                        {(!record.photos || record.photos.length === 0) && (
+                          <div>
+                            <p className="text-xs text-gray-500 font-semibold mb-2.5 flex items-center gap-1.5">
+                              <Camera className="w-3.5 h-3.5" />
+                              활동 사진
+                            </p>
+                            <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                              <ImagePlus className="w-4 h-4 text-slate-500" />
+                              <span className="text-sm font-medium text-slate-600">사진 추가하기</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => addPhotoToRecord(record.id, e)}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-xl p-10 text-center border border-gray-100">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-4">
+                      <FileText className="w-8 h-8 text-gray-300" />
+                    </div>
+                    <p className="text-base font-medium text-gray-400">
+                      {selectedYear}년 {selectedMonth}월에<br/>등록된 활동 기록이 없습니다.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 사진 확대 모달 */}
+          {selectedPhoto && (
+            <div
+              onClick={() => setSelectedPhoto(null)}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            >
+              <div className="relative max-w-4xl w-full">
+                <button
+                  onClick={() => setSelectedPhoto(null)}
+                  className="absolute -top-12 right-0 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                >
+                  <X className="w-6 h-6 text-white" />
+                </button>
+                <img
+                  src={selectedPhoto.url}
+                  alt={selectedPhoto.name}
+                  className="w-full h-auto rounded-xl shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <p className="text-white text-center mt-4 text-sm">{selectedPhoto.name}</p>
+              </div>
             </div>
           )}
         </div>
