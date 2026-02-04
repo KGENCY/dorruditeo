@@ -30,6 +30,20 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
     adminId: '',
   });
   const [addCompanyComplete, setAddCompanyComplete] = useState({});
+
+  // 영업 담당자 (PM) 정보 상태
+  const [pmInfo, setPmInfo] = useState({ name: '', phone: '', email: '' });
+
+  const updatePmInfo = (field, value) => {
+    setPmInfo({ ...pmInfo, [field]: value });
+  };
+
+  const closeAddCompanyModal = () => {
+    setShowAddCompanyModal(false);
+    setAddCompanyForm({ companyName: '', businessNumber: '', address: '', contractStartDate: '', contactName: '', contactPhone: '', contactEmail: '', adminId: '' });
+    setAddCompanyComplete({});
+    setPmInfo({ name: '', phone: '', email: '' });
+  };
   const [editingRevenue, setEditingRevenue] = useState(null); // {companyId: number}
   const [revenueEditValue, setRevenueEditValue] = useState('');
   const [hasNewNotification, setHasNewNotification] = useState(true);
@@ -67,11 +81,11 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
   }, []);
 
   const [companiesData, setCompaniesData] = useState([
-    { id: 1, name: '(주)두루빛 제조', industry: '제조업', location: '서울 강남구', workers: 15, contractEnd: '2026-12-31', status: 'active', revenue: 4500000 },
-    { id: 2, name: '세종식품', industry: '식품가공', location: '경기 성남시', workers: 12, contractEnd: '2026-03-15', status: 'expiring', revenue: 3600000 },
-    { id: 3, name: '한빛포장', industry: '포장/물류', location: '인천 남동구', workers: 18, contractEnd: '2027-06-30', status: 'active', revenue: 5400000 },
-    { id: 4, name: '그린팜', industry: '농업', location: '충남 천안시', workers: 8, contractEnd: '2026-02-28', status: 'expiring', revenue: 2400000 },
-    { id: 5, name: '참좋은케어', industry: '서비스업', location: '서울 송파구', workers: 10, contractEnd: '2026-09-15', status: 'active', revenue: 3000000 },
+    { id: 1, name: '(주)두루빛 제조', industry: '제조업', location: '서울 강남구', workers: 15, contractEnd: '2026-12-31', status: 'active', revenue: 4500000, pm: { name: '김영업', phone: '010-1111-2222', email: 'sales.kim@duruviter.com' } },
+    { id: 2, name: '세종식품', industry: '식품가공', location: '경기 성남시', workers: 12, contractEnd: '2026-03-15', status: 'expiring', revenue: 3600000, pm: { name: '이매니저', phone: '010-5555-6666', email: 'manager.lee@duruviter.com' } },
+    { id: 3, name: '한빛포장', industry: '포장/물류', location: '인천 남동구', workers: 18, contractEnd: '2027-06-30', status: 'active', revenue: 5400000, pm: { name: '최영업', phone: '010-7777-8888', email: 'sales.choi@duruviter.com' } },
+    { id: 4, name: '그린팜', industry: '농업', location: '충남 천안시', workers: 8, contractEnd: '2026-02-28', status: 'expiring', revenue: 2400000, pm: { name: '정담당', phone: '010-9999-0000', email: 'pm.jung@duruviter.com' } },
+    { id: 5, name: '참좋은케어', industry: '서비스업', location: '서울 송파구', workers: 10, contractEnd: '2026-09-15', status: 'active', revenue: 3000000, pm: { name: '한영업', phone: '010-1234-5678', email: 'sales.han@duruviter.com' } },
   ]);
 
   const updateAddCompanyForm = (field, value) => {
@@ -89,10 +103,28 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
   const handleAddCompanySubmit = () => {
     const required = ['companyName', 'businessNumber', 'contractStartDate', 'contactName', 'contactPhone', 'adminId'];
     const allFilled = required.every(f => addCompanyForm[f].trim());
-    if (!allFilled) return;
+    // PM 정보 필수 검증
+    const pmValid = pmInfo.name.trim() && pmInfo.phone.trim() && pmInfo.email.trim();
+    if (!allFilled || !pmValid) return;
+
+    // 새 회원사 데이터 생성
+    const newCompany = {
+      id: companiesData.length + 1,
+      name: addCompanyForm.companyName,
+      industry: '미정',
+      location: addCompanyForm.address || '미정',
+      workers: 0,
+      contractEnd: addCompanyForm.contractStartDate,
+      status: 'active',
+      revenue: 0,
+      pm: { name: pmInfo.name, phone: pmInfo.phone, email: pmInfo.email }
+    };
+    setCompaniesData([...companiesData, newCompany]);
+
     setShowAddCompanyModal(false);
     setAddCompanyForm({ companyName: '', businessNumber: '', address: '', contractStartDate: '', contactName: '', contactPhone: '', contactEmail: '', adminId: '' });
     setAddCompanyComplete({});
+    setPmInfo({ name: '', phone: '', email: '' });
   };
 
   // 더미 데이터
@@ -1444,7 +1476,7 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
       {/* 회원사 추가 모달 */}
       {showAddCompanyModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowAddCompanyModal(false)} />
+          <div className="absolute inset-0 bg-black/40" onClick={closeAddCompanyModal} />
           <div className="relative bg-white rounded-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto shadow-xl">
             {/* 모달 헤더 */}
             <div className="sticky top-0 bg-white rounded-t-2xl border-b border-gray-200 px-6 py-5 flex items-center justify-between z-10">
@@ -1453,7 +1485,7 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                 <p className="text-xs text-gray-500 mt-0.5">새로운 회원사 정보를 입력해주세요</p>
               </div>
               <button
-                onClick={() => setShowAddCompanyModal(false)}
+                onClick={closeAddCompanyModal}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5 text-gray-400" />
@@ -1603,7 +1635,59 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                 </div>
               </div>
 
-              {/* 섹션 3: 기업 관리자 계정 설정 */}
+              {/* 섹션 3: 영업 담당자 (PM) 정보 */}
+              <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <User className="w-4 h-4 text-duru-orange-500" />
+                  영업 담당자 (PM) 정보
+                </h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      담당자 이름 <span className="text-duru-orange-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="홍길동"
+                      value={pmInfo.name}
+                      onChange={(e) => updatePmInfo('name', e.target.value)}
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      담당자 연락처 <span className="text-duru-orange-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="tel"
+                        placeholder="010-0000-0000"
+                        value={pmInfo.phone}
+                        onChange={(e) => updatePmInfo('phone', e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      담당자 이메일 <span className="text-duru-orange-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="email"
+                        placeholder="pm@duruviter.com"
+                        value={pmInfo.email}
+                        onChange={(e) => updatePmInfo('email', e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 섹션 4: 기업 관리자 계정 설정 */}
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
                 <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <Lock className="w-4 h-4 text-duru-orange-500" />
@@ -1638,14 +1722,14 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
             {/* 모달 푸터 */}
             <div className="sticky bottom-0 bg-white rounded-b-2xl border-t border-gray-200 px-6 py-4 flex gap-3">
               <button
-                onClick={() => setShowAddCompanyModal(false)}
+                onClick={closeAddCompanyModal}
                 className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-sm"
               >
                 취소
               </button>
               <button
                 onClick={handleAddCompanySubmit}
-                disabled={!['companyName', 'businessNumber', 'contractStartDate', 'contactName', 'contactPhone', 'adminId'].every(f => addCompanyForm[f].trim())}
+                disabled={!['companyName', 'businessNumber', 'contractStartDate', 'contactName', 'contactPhone', 'adminId'].every(f => addCompanyForm[f].trim()) || !pmInfo.name.trim() || !pmInfo.phone.trim() || !pmInfo.email.trim()}
                 className="flex-[2] py-3 bg-duru-orange-500 text-white rounded-xl font-semibold hover:bg-duru-orange-600 transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4" />

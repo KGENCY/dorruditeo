@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Building2, Phone, Mail, MapPin, User, Calendar, DollarSign, Users, FileText, TrendingUp, Clock, Edit3, Save, X, Upload, Download, Trash2, Paperclip, Eye, Hash } from 'lucide-react';
+import { ArrowLeft, Building2, Phone, Mail, MapPin, User, Calendar, Users, FileText, Edit3, Save, X, Upload, Download, Trash2, Paperclip, Eye, Hash, Check } from 'lucide-react';
 
 const CompanyDetail = ({ company, onClose }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -10,23 +10,40 @@ const CompanyDetail = ({ company, onClose }) => {
     address: '서울시 강남구 테헤란로 123'
   });
 
+  // 영업 담당자 (PM) 정보 상태
+  const [pmInfo, setPmInfo] = useState(
+    company.pm || { name: '김영업', phone: '010-1111-2222', email: 'sales.kim@duruviter.com' }
+  );
+  const [isEditingPm, setIsEditingPm] = useState(false);
+  const [editedPm, setEditedPm] = useState({ name: '', phone: '', email: '' });
+
+  const handleEditPm = () => {
+    setEditedPm({ name: pmInfo.name, phone: pmInfo.phone, email: pmInfo.email });
+    setIsEditingPm(true);
+  };
+
+  const handleSavePm = () => {
+    setPmInfo({ ...editedPm });
+    setIsEditingPm(false);
+    setEditedPm({ name: '', phone: '', email: '' });
+  };
+
+  const handleCancelPmEdit = () => {
+    setIsEditingPm(false);
+    setEditedPm({ name: '', phone: '', email: '' });
+  };
+
   const workers = [
-    { id: 1, name: '김민수', phone: '010-1234-5678', hireDate: '2025-06-15', status: '근무중', disability: '지체장애' },
-    { id: 2, name: '이영희', phone: '010-2345-6789', hireDate: '2025-07-01', status: '근무중', disability: '청각장애' },
-    { id: 3, name: '박철수', phone: '010-3456-7890', hireDate: '2025-08-10', status: '근무중', disability: '시각장애' },
-    { id: 4, name: '정수진', phone: '010-4567-8901', hireDate: '2025-09-01', status: '근무중', disability: '지적장애' },
+    { id: 1, name: '김민수', phone: '010-1234-5678', hireDate: '2025-06-15', workerId: 'ms0315', disability: '지체장애' },
+    { id: 2, name: '이영희', phone: '010-2345-6789', hireDate: '2025-07-01', workerId: 'yh0520', disability: '청각장애' },
+    { id: 3, name: '박철수', phone: '010-3456-7890', hireDate: '2025-08-10', workerId: 'cs1108', disability: '시각장애' },
+    { id: 4, name: '정수진', phone: '010-4567-8901', hireDate: '2025-09-01', workerId: 'sj0723', disability: '지적장애' },
   ];
 
   const uploadedFiles = [
     { id: 1, name: '두루빛터_위탁계약서_2025.pdf', uploadDate: '2025-06-01', size: '2.4 MB' },
     { id: 2, name: '개인정보처리위탁_동의서.pdf', uploadDate: '2025-06-01', size: '1.1 MB' },
     { id: 3, name: '근로자_배치계획서_2026.pdf', uploadDate: '2026-01-10', size: '850 KB' },
-  ];
-
-  const contracts = [
-    { id: 1, type: '월간 정산', period: '2026-01', amount: 12800000, status: '완료', date: '2026-02-05' },
-    { id: 2, type: '월간 정산', period: '2025-12', amount: 12500000, status: '완료', date: '2026-01-05' },
-    { id: 3, type: '월간 정산', period: '2025-11', amount: 12300000, status: '완료', date: '2025-12-05' },
   ];
 
   const handleSaveEdit = () => {
@@ -184,34 +201,84 @@ const CompanyDetail = ({ company, onClose }) => {
               </div>
             </div>
 
-            {/* 통계 카드 */}
+            {/* 영업 담당자 (PM) */}
             <div className="bg-white rounded-xl p-6 border border-gray-200">
               <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-duru-orange-600" />
-                주요 지표
+                <User className="w-5 h-5 text-duru-orange-600" />
+                영업 담당자 (PM)
               </h3>
-              <div className="space-y-4">
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">근로자 수</span>
-                    <Users className="w-4 h-4 text-blue-600" />
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                {isEditingPm ? (
+                  // 수정 모드
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">이름</label>
+                      <input
+                        type="text"
+                        value={editedPm.name}
+                        onChange={(e) => setEditedPm({...editedPm, name: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">연락처</label>
+                      <input
+                        type="tel"
+                        value={editedPm.phone}
+                        onChange={(e) => setEditedPm({...editedPm, phone: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1">이메일</label>
+                      <input
+                        type="email"
+                        value={editedPm.email}
+                        onChange={(e) => setEditedPm({...editedPm, email: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                      />
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        onClick={handleCancelPmEdit}
+                        className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg text-xs font-semibold hover:bg-gray-100 transition-colors"
+                      >
+                        취소
+                      </button>
+                      <button
+                        onClick={handleSavePm}
+                        className="flex-1 py-2 bg-duru-orange-500 text-white rounded-lg text-xs font-semibold hover:bg-duru-orange-600 transition-colors flex items-center justify-center gap-1"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        저장
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-2xl font-bold text-blue-600">{company.workerCount}명</p>
-                </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">평균 출근율</span>
-                    <Clock className="w-4 h-4 text-green-600" />
+                ) : (
+                  // 표시 모드
+                  <div className="relative">
+                    <button
+                      onClick={handleEditPm}
+                      className="absolute top-0 right-0 px-2 py-1 text-xs font-semibold text-gray-500 hover:text-duru-orange-600 hover:bg-white rounded transition-colors"
+                    >
+                      수정
+                    </button>
+                    <div className="space-y-1.5 pr-12">
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm font-semibold text-gray-900">{pmInfo.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-gray-400" />
+                        <span className="text-xs text-gray-600">{pmInfo.phone}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4 text-gray-400" />
+                        <span className="text-xs text-gray-600">{pmInfo.email}</span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-2xl font-bold text-green-600">97.8%</p>
-                </div>
-                <div className="bg-orange-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">이번 달 정산</span>
-                    <DollarSign className="w-4 h-4 text-orange-600" />
-                  </div>
-                  <p className="text-2xl font-bold text-orange-600">{(company.monthlyRevenue || 12800000).toLocaleString()}원</p>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -233,7 +300,7 @@ const CompanyDetail = ({ company, onClose }) => {
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">전화번호</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">입사일</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">장애유형</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">상태</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">고유번호</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -243,11 +310,7 @@ const CompanyDetail = ({ company, onClose }) => {
                         <td className="px-4 py-3 text-gray-600">{worker.phone}</td>
                         <td className="px-4 py-3 text-gray-600">{worker.hireDate}</td>
                         <td className="px-4 py-3 text-gray-600">{worker.disability}</td>
-                        <td className="px-4 py-3">
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                            {worker.status}
-                          </span>
-                        </td>
+                        <td className="px-4 py-3 text-gray-900 font-mono">{worker.workerId}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -301,46 +364,6 @@ const CompanyDetail = ({ company, onClose }) => {
               </div>
             </div>
 
-            {/* 정산 내역 */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-duru-orange-600" />
-                정산 내역
-              </h3>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">구분</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">기간</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">금액</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">상태</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">처리일</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {contracts.map((contract) => (
-                      <tr key={contract.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-gray-900">{contract.type}</td>
-                        <td className="px-4 py-3 text-gray-600">{contract.period}</td>
-                        <td className="px-4 py-3 text-gray-900 font-semibold">{contract.amount.toLocaleString()}원</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            contract.status === '완료' ? 'bg-green-100 text-green-700' :
-                            contract.status === '대기' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
-                          }`}>
-                            {contract.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-gray-600">{contract.date}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
         </div>
       </div>
