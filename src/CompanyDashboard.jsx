@@ -153,14 +153,26 @@ const CompanyDashboard = ({ onClose }) => {
     '호흡기장애', '간장애', '안면장애', '장루·요루장애', '간질장애'
   ];
 
-  // 더미 데이터 (입사일, 퇴사일 포함)
-  const employees = [
-    { id: 1, name: '김민수', phone: '010-1234-5678', disability: '지체장애 3급', hireDate: '2025-03-01', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:00', checkoutTime: null },
-    { id: 2, name: '이영희', phone: '010-2345-6789', disability: '청각장애 2급', hireDate: '2025-06-15', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:15', checkoutTime: null },
-    { id: 3, name: '박철수', phone: '010-3456-7890', disability: '시각장애 4급', hireDate: '2025-08-01', contractEnd: '2026-03-15', status: 'checkout', checkinTime: '09:00', checkoutTime: '18:00' },
-    { id: 4, name: '정미라', phone: '010-4567-8901', disability: '지체장애 2급', hireDate: '2025-09-01', contractEnd: '2027-06-30', status: 'checkin', checkinTime: '08:45', checkoutTime: null },
-    { id: 5, name: '최동욱', phone: '010-5678-9012', disability: '발달장애 3급', hireDate: '2025-11-01', contractEnd: '2026-01-22', status: 'absent', checkinTime: null, checkoutTime: null },
-  ];
+  // 더미 데이터 (입사일, 퇴사 정보 포함) - 상태로 관리
+  const [employeesData, setEmployeesData] = useState([
+    { id: 1, name: '김민수', phone: '010-1234-5678', disability: '지체장애 3급', hireDate: '2025-03-01', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:00', checkoutTime: null, isResigned: false, resignDate: null, resignReason: null },
+    { id: 2, name: '이영희', phone: '010-2345-6789', disability: '청각장애 2급', hireDate: '2025-06-15', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:15', checkoutTime: null, isResigned: false, resignDate: null, resignReason: null },
+    { id: 3, name: '박철수', phone: '010-3456-7890', disability: '시각장애 4급', hireDate: '2025-08-01', contractEnd: '2026-03-15', status: 'checkout', checkinTime: '09:00', checkoutTime: '18:00', isResigned: false, resignDate: null, resignReason: null },
+    { id: 4, name: '정미라', phone: '010-4567-8901', disability: '지체장애 2급', hireDate: '2025-09-01', contractEnd: '2027-06-30', status: 'checkin', checkinTime: '08:45', checkoutTime: null, isResigned: false, resignDate: null, resignReason: null },
+    { id: 5, name: '최동욱', phone: '010-5678-9012', disability: '발달장애 3급', hireDate: '2025-11-01', contractEnd: '2026-01-22', status: 'resigned', checkinTime: null, checkoutTime: null, isResigned: true, resignDate: '2026-01-22', resignReason: '개인 사유로 인한 자진 퇴사' },
+  ]);
+
+  // 퇴사 처리 함수
+  const handleEmployeeResign = (employeeId, resignDate, resignReason) => {
+    setEmployeesData(prev => prev.map(emp =>
+      emp.id === employeeId
+        ? { ...emp, isResigned: true, status: 'resigned', resignDate, resignReason }
+        : emp
+    ));
+  };
+
+  // 기존 employees 변수 유지 (호환성)
+  const employees = employeesData;
 
   // 특정 날짜 기준 소속 근로자 수 계산 (입사일 <= 해당날짜 <= 퇴사일인 근로자 수)
   const getActiveWorkersCount = (year, month, day) => {
@@ -234,7 +246,7 @@ const CompanyDashboard = ({ onClose }) => {
 
   // 근로자 상세보기가 선택되면 EmployeeDetail 컴포넌트 표시
   if (selectedEmployee) {
-    return <EmployeeDetail employee={selectedEmployee} onClose={() => setSelectedEmployee(null)} />;
+    return <EmployeeDetail employee={selectedEmployee} onClose={() => setSelectedEmployee(null)} onResign={handleEmployeeResign} />;
   }
 
   return (

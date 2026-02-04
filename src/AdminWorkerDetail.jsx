@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, User, Briefcase, Phone, Mail, MapPin, FileText, Upload, Download, Eye, X, Calendar, Clock, Edit3, Save, Building2, IdCard, Shield, Hash, Heart, Users as UserIcon, Edit2, Check } from 'lucide-react';
+import { ArrowLeft, User, Briefcase, Phone, Mail, MapPin, FileText, Upload, Download, Eye, X, Calendar, Clock, Edit3, Save, Building2, IdCard, Shield, Hash, Heart, Users as UserIcon, Edit2, Check, UserX } from 'lucide-react';
 
 const AdminWorkerDetail = ({ worker, onClose }) => {
   const [documents, setDocuments] = useState([
@@ -31,6 +31,7 @@ const AdminWorkerDetail = ({ worker, onClose }) => {
   const [selectedCalendarRecord, setSelectedCalendarRecord] = useState(null);
   const [isEditingCalendarRecord, setIsEditingCalendarRecord] = useState(false);
   const [editedCalendarRecord, setEditedCalendarRecord] = useState(null);
+
 
   const [attendanceHistory, setAttendanceHistory] = useState([
     { date: '2026-01-28', checkin: '결근', checkout: '-', status: '결근', workDone: '-' },
@@ -149,11 +150,12 @@ const AdminWorkerDetail = ({ worker, onClose }) => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-1">{worker.name}</h2>
                 <p className="text-gray-600">{worker.position}</p>
                 <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-2 ${
-                  worker.status === '근무중' ? 'bg-green-100 text-green-700' :
+                  worker.isResigned ? 'bg-gray-200 text-gray-600' :
+                  worker.status === '근무중' || worker.status === 'working' ? 'bg-green-100 text-green-700' :
                   worker.status === '휴직' ? 'bg-yellow-100 text-yellow-700' :
                   'bg-gray-200 text-gray-700'
                 }`}>
-                  {worker.status}
+                  {worker.isResigned ? '퇴사' : worker.status === 'working' ? '근무중' : worker.status}
                 </span>
               </div>
 
@@ -227,6 +229,29 @@ const AdminWorkerDetail = ({ worker, onClose }) => {
                 </div>
               </div>
             </div>
+
+            {/* 퇴사 정보 (퇴사자인 경우) */}
+            {worker.isResigned && (
+              <div className="bg-gray-100 rounded-xl p-4 border border-gray-300">
+                <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                  <UserX className="w-4 h-4 text-gray-500" />
+                  퇴사 정보
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">퇴사일</span>
+                    <span className="font-bold text-gray-700">{worker.resignDate}</span>
+                  </div>
+                  {worker.resignReason && (
+                    <div className="text-xs">
+                      <span className="text-gray-600">비고</span>
+                      <p className="mt-1 p-2 bg-white rounded border border-gray-200 text-gray-700">{worker.resignReason}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
           </div>
 
           {/* 오른쪽: 상세 정보 */}
@@ -754,6 +779,7 @@ const AdminWorkerDetail = ({ worker, onClose }) => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

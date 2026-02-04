@@ -131,13 +131,33 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
     setRevenueEditValue('');
   };
 
-  const workers = [
-    { id: 1, name: '김민수', company: '(주)두루빛 제조', department: '제조부', disability: '지체장애 3급', status: 'working', phone: '010-1234-5678', contractEnd: '2026-12-31' },
-    { id: 2, name: '이영희', company: '(주)두루빛 제조', department: '포장부', disability: '청각장애 2급', status: 'working', phone: '010-2345-6789', contractEnd: '2026-12-31' },
-    { id: 3, name: '박철수', company: '세종식품', department: '생산부', disability: '시각장애 4급', status: 'working', phone: '010-3456-7890', contractEnd: '2026-03-15' },
-    { id: 4, name: '정미라', company: '한빛포장', department: '품질관리', disability: '지체장애 2급', status: 'working', phone: '010-4567-8901', contractEnd: '2027-06-30' },
-    { id: 5, name: '최동욱', company: '그린팜', department: '재배', disability: '발달장애 3급', status: 'absent', phone: '010-5678-9012', contractEnd: '2026-02-28' },
-  ];
+  const [workerFilter, setWorkerFilter] = useState('current'); // 'current' | 'resigned' | 'all'
+  const [workersData, setWorkersData] = useState([
+    { id: 1, name: '김민수', company: '(주)두루빛 제조', department: '제조부', disability: '지체장애 3급', status: 'working', phone: '010-1234-5678', contractEnd: '2026-12-31', isResigned: false, resignDate: null, resignReason: null },
+    { id: 2, name: '이영희', company: '(주)두루빛 제조', department: '포장부', disability: '청각장애 2급', status: 'working', phone: '010-2345-6789', contractEnd: '2026-12-31', isResigned: false, resignDate: null, resignReason: null },
+    { id: 3, name: '박철수', company: '세종식품', department: '생산부', disability: '시각장애 4급', status: 'working', phone: '010-3456-7890', contractEnd: '2026-03-15', isResigned: false, resignDate: null, resignReason: null },
+    { id: 4, name: '정미라', company: '한빛포장', department: '품질관리', disability: '지체장애 2급', status: 'working', phone: '010-4567-8901', contractEnd: '2027-06-30', isResigned: false, resignDate: null, resignReason: null },
+    { id: 5, name: '최동욱', company: '그린팜', department: '재배', disability: '발달장애 3급', status: 'resigned', phone: '010-5678-9012', contractEnd: '2026-02-28', isResigned: true, resignDate: '2026-01-22', resignReason: '개인 사유로 인한 자진 퇴사' },
+    { id: 6, name: '한지민', company: '세종식품', department: '포장부', disability: '청각장애 3급', status: 'resigned', phone: '010-6789-0123', contractEnd: '2026-06-30', isResigned: true, resignDate: '2026-01-15', resignReason: '건강 문제로 인한 퇴사' },
+  ]);
+
+  const filteredWorkers = workersData.filter(worker => {
+    if (workerFilter === 'current') return !worker.isResigned;
+    if (workerFilter === 'resigned') return worker.isResigned;
+    return true; // 'all'
+  });
+
+  // 퇴사 처리 함수
+  const handleWorkerResign = (workerId, resignDate, resignReason) => {
+    setWorkersData(prev => prev.map(w =>
+      w.id === workerId
+        ? { ...w, isResigned: true, status: 'resigned', resignDate, resignReason }
+        : w
+    ));
+  };
+
+  // 기존 workers 변수 유지 (호환성)
+  const workers = workersData;
 
   const notifications = [
     { id: 1, type: 'contract', title: '세종식품 계약 만료 임박', message: '2026년 3월 15일 계약 만료 예정', priority: 'high', date: '2026-01-28' },
@@ -864,6 +884,26 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-900">근로자 관리</h2>
               <div className="flex items-center gap-3">
+                {/* 필터 버튼 그룹 */}
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                  {[
+                    { id: 'current', label: '현재 근로자' },
+                    { id: 'resigned', label: '퇴사자' },
+                    { id: 'all', label: '전체' }
+                  ].map(filter => (
+                    <button
+                      key={filter.id}
+                      onClick={() => setWorkerFilter(filter.id)}
+                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                        workerFilter === filter.id
+                          ? 'bg-white text-duru-orange-600 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
@@ -872,9 +912,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
                   />
                 </div>
-                <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                  <Filter className="w-5 h-5 text-gray-600" />
-                </button>
               </div>
             </div>
 
@@ -893,33 +930,41 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {workers.map(worker => (
-                      <tr key={worker.id} className="hover:bg-gray-50">
+                    {filteredWorkers.map(worker => (
+                      <tr key={worker.id} className={`hover:bg-gray-50 ${worker.isResigned ? 'bg-gray-50' : ''}`}>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-duru-orange-100 rounded-full flex items-center justify-center">
-                              <span className="text-sm font-bold text-duru-orange-600">{worker.name[0]}</span>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${worker.isResigned ? 'bg-gray-200' : 'bg-duru-orange-100'}`}>
+                              <span className={`text-sm font-bold ${worker.isResigned ? 'text-gray-500' : 'text-duru-orange-600'}`}>{worker.name[0]}</span>
                             </div>
                             <div>
-                              <p className="font-semibold text-gray-900">{worker.name}</p>
+                              <p className={`font-semibold ${worker.isResigned ? 'text-gray-500' : 'text-gray-900'}`}>{worker.name}</p>
                               <p className="text-sm text-gray-600">{worker.phone}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-gray-900">{worker.company}</td>
-                        <td className="px-6 py-4 text-gray-900">{worker.phone}</td>
-                        <td className="px-6 py-4 text-gray-600">{worker.disability}</td>
-                        <td className="px-6 py-4 text-gray-900">{worker.contractEnd}</td>
+                        <td className={`px-6 py-4 ${worker.isResigned ? 'text-gray-500' : 'text-gray-900'}`}>{worker.company}</td>
+                        <td className={`px-6 py-4 ${worker.isResigned ? 'text-gray-500' : 'text-gray-900'}`}>{worker.phone}</td>
+                        <td className={`px-6 py-4 ${worker.isResigned ? 'text-gray-500' : 'text-gray-600'}`}>{worker.disability}</td>
+                        <td className="px-6 py-4">
+                          {worker.isResigned ? (
+                            <span className="text-gray-500">{worker.resignDate}</span>
+                          ) : (
+                            <span className="text-gray-900">{worker.contractEnd}</span>
+                          )}
+                        </td>
                         <td className="px-6 py-4">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            worker.status === 'working' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                            worker.isResigned ? 'bg-gray-200 text-gray-600' :
+                            worker.status === 'working' ? 'bg-green-100 text-green-700' :
+                            worker.status === 'absent' ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600'
                           }`}>
-                            {worker.status === 'working' ? '근무중' : '결근'}
+                            {worker.isResigned ? '퇴사' : worker.status === 'working' ? '근무중' : '결근'}
                           </span>
                         </td>
                         <td className="px-6 py-4">
                           <button
-                            onClick={() => setSelectedWorker({...worker, position: worker.department, hireDate: worker.contractEnd.substring(0, 10), contractStart: '2025-06-01'})}
+                            onClick={() => setSelectedWorker({...worker, position: worker.department, hireDate: worker.contractEnd.substring(0, 10), contractStart: '2025-06-01', onResign: handleWorkerResign})}
                             className="text-duru-orange-600 hover:text-duru-orange-700 font-semibold text-sm"
                           >
                             상세보기
