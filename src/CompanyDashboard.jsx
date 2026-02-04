@@ -155,11 +155,11 @@ const CompanyDashboard = ({ onClose }) => {
 
   // 더미 데이터 (입사일, 퇴사 정보 포함) - 상태로 관리
   const [employeesData, setEmployeesData] = useState([
-    { id: 1, name: '김민수', phone: '010-1234-5678', disability: '지체장애 3급', hireDate: '2025-03-01', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:00', checkoutTime: null, isResigned: false, resignDate: null, resignReason: null },
-    { id: 2, name: '이영희', phone: '010-2345-6789', disability: '청각장애 2급', hireDate: '2025-06-15', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:15', checkoutTime: null, isResigned: false, resignDate: null, resignReason: null },
-    { id: 3, name: '박철수', phone: '010-3456-7890', disability: '시각장애 4급', hireDate: '2025-08-01', contractEnd: '2026-03-15', status: 'checkout', checkinTime: '09:00', checkoutTime: '18:00', isResigned: false, resignDate: null, resignReason: null },
-    { id: 4, name: '정미라', phone: '010-4567-8901', disability: '지체장애 2급', hireDate: '2025-09-01', contractEnd: '2027-06-30', status: 'checkin', checkinTime: '08:45', checkoutTime: null, isResigned: false, resignDate: null, resignReason: null },
-    { id: 5, name: '최동욱', phone: '010-5678-9012', disability: '발달장애 3급', hireDate: '2025-11-01', contractEnd: '2026-01-22', status: 'resigned', checkinTime: null, checkoutTime: null, isResigned: true, resignDate: '2026-01-22', resignReason: '개인 사유로 인한 자진 퇴사' },
+    { id: 1, name: '김민수', phone: '010-1234-5678', disability: '지체장애 3급', hireDate: '2025-03-01', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:00', checkoutTime: null, workerId: 'ms0315', notes: '성실하고 꼼꼼함. 품질 검수 업무에 적합', isResigned: false, resignDate: null, resignReason: null },
+    { id: 2, name: '이영희', phone: '010-2345-6789', disability: '청각장애 2급', hireDate: '2025-06-15', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:15', checkoutTime: null, workerId: 'yh0520', notes: '수화 가능. 포장 작업 숙련도 높음', isResigned: false, resignDate: null, resignReason: null },
+    { id: 3, name: '박철수', phone: '010-3456-7890', disability: '시각장애 4급', hireDate: '2025-08-01', contractEnd: '2026-03-15', status: 'checkout', checkinTime: '09:00', checkoutTime: '18:00', workerId: 'cs1108', notes: '보조기기 사용. 단순 조립 업무 담당', isResigned: false, resignDate: null, resignReason: null },
+    { id: 4, name: '정미라', phone: '010-4567-8901', disability: '지체장애 2급', hireDate: '2025-09-01', contractEnd: '2027-06-30', status: 'checkin', checkinTime: '08:45', checkoutTime: null, workerId: 'mr0723', notes: '휠체어 사용. 사무 보조 업무 가능', isResigned: false, resignDate: null, resignReason: null },
+    { id: 5, name: '최동욱', phone: '010-5678-9012', disability: '발달장애 3급', hireDate: '2025-11-01', contractEnd: '2026-01-22', status: 'resigned', checkinTime: null, checkoutTime: null, workerId: 'dw0412', notes: '반복 작업 능숙. 재배 작업 담당했음', isResigned: true, resignDate: '2026-01-22', resignReason: '개인 사유로 인한 자진 퇴사' },
   ]);
 
   // 퇴사 처리 함수

@@ -133,12 +133,12 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
 
   const [workerFilter, setWorkerFilter] = useState('current'); // 'current' | 'resigned' | 'all'
   const [workersData, setWorkersData] = useState([
-    { id: 1, name: '김민수', company: '(주)두루빛 제조', department: '제조부', disability: '지체장애 3급', status: 'working', phone: '010-1234-5678', contractEnd: '2026-12-31', isResigned: false, resignDate: null, resignReason: null },
-    { id: 2, name: '이영희', company: '(주)두루빛 제조', department: '포장부', disability: '청각장애 2급', status: 'working', phone: '010-2345-6789', contractEnd: '2026-12-31', isResigned: false, resignDate: null, resignReason: null },
-    { id: 3, name: '박철수', company: '세종식품', department: '생산부', disability: '시각장애 4급', status: 'working', phone: '010-3456-7890', contractEnd: '2026-03-15', isResigned: false, resignDate: null, resignReason: null },
-    { id: 4, name: '정미라', company: '한빛포장', department: '품질관리', disability: '지체장애 2급', status: 'working', phone: '010-4567-8901', contractEnd: '2027-06-30', isResigned: false, resignDate: null, resignReason: null },
-    { id: 5, name: '최동욱', company: '그린팜', department: '재배', disability: '발달장애 3급', status: 'resigned', phone: '010-5678-9012', contractEnd: '2026-02-28', isResigned: true, resignDate: '2026-01-22', resignReason: '개인 사유로 인한 자진 퇴사' },
-    { id: 6, name: '한지민', company: '세종식품', department: '포장부', disability: '청각장애 3급', status: 'resigned', phone: '010-6789-0123', contractEnd: '2026-06-30', isResigned: true, resignDate: '2026-01-15', resignReason: '건강 문제로 인한 퇴사' },
+    { id: 1, name: '김민수', company: '(주)두루빛 제조', department: '제조부', disability: '지체장애', status: 'working', phone: '010-1234-5678', contractEnd: '2026-12-31', workerId: 'ms0315', notes: '성실하고 꼼꼼함. 품질 검수 업무에 적합', isResigned: false, resignDate: null, resignReason: null },
+    { id: 2, name: '이영희', company: '(주)두루빛 제조', department: '포장부', disability: '청각장애', status: 'working', phone: '010-2345-6789', contractEnd: '2026-12-31', workerId: 'yh0520', notes: '수화 가능. 포장 작업 숙련도 높음', isResigned: false, resignDate: null, resignReason: null },
+    { id: 3, name: '박철수', company: '세종식품', department: '생산부', disability: '시각장애', status: 'working', phone: '010-3456-7890', contractEnd: '2026-03-15', workerId: 'cs1108', notes: '보조기기 사용. 단순 조립 업무 담당', isResigned: false, resignDate: null, resignReason: null },
+    { id: 4, name: '정미라', company: '한빛포장', department: '품질관리', disability: '지체장애', status: 'working', phone: '010-4567-8901', contractEnd: '2027-06-30', workerId: 'mr0723', notes: '휠체어 사용. 사무 보조 업무 가능', isResigned: false, resignDate: null, resignReason: null },
+    { id: 5, name: '최동욱', company: '그린팜', department: '재배', disability: '발달장애', status: 'resigned', phone: '010-5678-9012', contractEnd: '2026-02-28', workerId: 'dw0412', notes: '반복 작업 능숙. 재배 작업 담당했음', isResigned: true, resignDate: '2026-01-22', resignReason: '개인 사유로 인한 자진 퇴사' },
+    { id: 6, name: '한지민', company: '세종식품', department: '포장부', disability: '청각장애', status: 'resigned', phone: '010-6789-0123', contractEnd: '2026-06-30', workerId: 'jm0630', notes: '수화 의사소통. 꼼꼼한 성격', isResigned: true, resignDate: '2026-01-15', resignReason: '건강 문제로 인한 퇴사' },
   ]);
 
   const filteredWorkers = workersData.filter(worker => {
@@ -920,49 +920,30 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">이름</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">회사</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">전화번호</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">장애유형</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">계약만료</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">상태</th>
-                      <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">관리</th>
+                      <th className="px-8 py-3 text-left text-sm font-semibold text-gray-900">이름</th>
+                      <th className="px-8 py-3 text-left text-sm font-semibold text-gray-900">회사</th>
+                      <th className="px-8 py-3 text-left text-sm font-semibold text-gray-900">전화번호</th>
+                      <th className="px-8 py-3 text-left text-sm font-semibold text-gray-900">장애유형</th>
+                      <th className="px-8 py-3 text-left text-sm font-semibold text-gray-900">고유번호</th>
+                      <th className="px-8 py-3 text-left text-sm font-semibold text-gray-900">관리</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {filteredWorkers.map(worker => (
                       <tr key={worker.id} className={`hover:bg-gray-50 ${worker.isResigned ? 'bg-gray-50' : ''}`}>
-                        <td className="px-6 py-4">
+                        <td className="px-8 py-4">
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${worker.isResigned ? 'bg-gray-200' : 'bg-duru-orange-100'}`}>
                               <span className={`text-sm font-bold ${worker.isResigned ? 'text-gray-500' : 'text-duru-orange-600'}`}>{worker.name[0]}</span>
                             </div>
-                            <div>
-                              <p className={`font-semibold ${worker.isResigned ? 'text-gray-500' : 'text-gray-900'}`}>{worker.name}</p>
-                              <p className="text-sm text-gray-600">{worker.phone}</p>
-                            </div>
+                            <span className={`font-semibold ${worker.isResigned ? 'text-gray-500' : 'text-gray-900'}`}>{worker.name}</span>
                           </div>
                         </td>
-                        <td className={`px-6 py-4 ${worker.isResigned ? 'text-gray-500' : 'text-gray-900'}`}>{worker.company}</td>
-                        <td className={`px-6 py-4 ${worker.isResigned ? 'text-gray-500' : 'text-gray-900'}`}>{worker.phone}</td>
-                        <td className={`px-6 py-4 ${worker.isResigned ? 'text-gray-500' : 'text-gray-600'}`}>{worker.disability}</td>
-                        <td className="px-6 py-4">
-                          {worker.isResigned ? (
-                            <span className="text-gray-500">{worker.resignDate}</span>
-                          ) : (
-                            <span className="text-gray-900">{worker.contractEnd}</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            worker.isResigned ? 'bg-gray-200 text-gray-600' :
-                            worker.status === 'working' ? 'bg-green-100 text-green-700' :
-                            worker.status === 'absent' ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600'
-                          }`}>
-                            {worker.isResigned ? '퇴사' : worker.status === 'working' ? '근무중' : '결근'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
+                        <td className={`px-8 py-4 ${worker.isResigned ? 'text-gray-500' : 'text-gray-900'}`}>{worker.company}</td>
+                        <td className={`px-8 py-4 ${worker.isResigned ? 'text-gray-500' : 'text-gray-900'}`}>{worker.phone}</td>
+                        <td className={`px-8 py-4 ${worker.isResigned ? 'text-gray-500' : 'text-gray-600'}`}>{worker.disability}</td>
+                        <td className={`px-8 py-4 font-mono ${worker.isResigned ? 'text-gray-500' : 'text-gray-900'}`}>{worker.workerId}</td>
+                        <td className="px-8 py-4">
                           <button
                             onClick={() => setSelectedWorker({...worker, position: worker.department, hireDate: worker.contractEnd.substring(0, 10), contractStart: '2025-06-01', onResign: handleWorkerResign})}
                             className="text-duru-orange-600 hover:text-duru-orange-700 font-semibold text-sm"

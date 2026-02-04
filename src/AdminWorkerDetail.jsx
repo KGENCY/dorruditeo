@@ -1,7 +1,27 @@
 import React, { useState } from 'react';
-import { ArrowLeft, User, Briefcase, Phone, Mail, MapPin, FileText, Upload, Download, Eye, X, Calendar, Clock, Edit3, Save, Building2, IdCard, Shield, Hash, Heart, Users as UserIcon, Edit2, Check, UserX } from 'lucide-react';
+import { ArrowLeft, User, Briefcase, Phone, Mail, MapPin, FileText, Upload, Download, Eye, X, Calendar, Clock, Edit3, Save, Building2, IdCard, Shield, Hash, Heart, Users as UserIcon, Edit2, Check, UserX, MessageSquare } from 'lucide-react';
 
 const AdminWorkerDetail = ({ worker, onClose }) => {
+  // 비고란 상태
+  const [notes, setNotes] = useState(worker.notes || '');
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [tempNotes, setTempNotes] = useState('');
+
+  const handleEditNotes = () => {
+    setTempNotes(notes);
+    setIsEditingNotes(true);
+  };
+
+  const handleSaveNotes = () => {
+    setNotes(tempNotes);
+    setIsEditingNotes(false);
+  };
+
+  const handleCancelNotes = () => {
+    setIsEditingNotes(false);
+    setTempNotes('');
+  };
+
   const [documents, setDocuments] = useState([
     { id: 1, name: '근로계약서.pdf', type: '계약서', uploadDate: '2025-12-01', size: '1.2MB' },
     { id: 2, name: '개인정보동의서.pdf', type: '동의서', uploadDate: '2025-12-01', size: '0.8MB' },
@@ -201,7 +221,7 @@ const AdminWorkerDetail = ({ worker, onClose }) => {
               </h3>
               <div className="bg-white rounded-lg p-4 border border-duru-orange-300">
                 <p className="text-2xl font-bold text-duru-orange-600 text-center tracking-wider">
-                  DW3456
+                  {worker.workerId || 'N/A'}
                 </p>
               </div>
             </div>
@@ -228,6 +248,56 @@ const AdminWorkerDetail = ({ worker, onClose }) => {
                   <span className="font-bold text-gray-900">2020-03-15</span>
                 </div>
               </div>
+            </div>
+
+            {/* 비고란 */}
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-duru-orange-600" />
+                  비고란
+                </h3>
+                {!isEditingNotes ? (
+                  <button
+                    onClick={handleEditNotes}
+                    className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-semibold hover:bg-gray-200 transition-colors flex items-center gap-1"
+                  >
+                    <Edit2 className="w-3 h-3" />
+                    수정
+                  </button>
+                ) : (
+                  <div className="flex gap-1">
+                    <button
+                      onClick={handleCancelNotes}
+                      className="px-2 py-1 border border-gray-300 text-gray-700 rounded text-xs font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      취소
+                    </button>
+                    <button
+                      onClick={handleSaveNotes}
+                      className="px-2 py-1 bg-duru-orange-500 text-white rounded text-xs font-semibold hover:bg-duru-orange-600 transition-colors flex items-center gap-1"
+                    >
+                      <Check className="w-3 h-3" />
+                      저장
+                    </button>
+                  </div>
+                )}
+              </div>
+              {!isEditingNotes ? (
+                <div className="bg-gray-50 rounded-lg p-3 min-h-[60px]">
+                  <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                    {notes || '특이사항이 없습니다.'}
+                  </p>
+                </div>
+              ) : (
+                <textarea
+                  value={tempNotes}
+                  onChange={(e) => setTempNotes(e.target.value)}
+                  placeholder="근로자 특징이나 특이사항을 입력하세요..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-duru-orange-500 resize-none"
+                />
+              )}
             </div>
 
             {/* 퇴사 정보 (퇴사자인 경우) */}
