@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Building2, Phone, Mail, MapPin, User, Calendar, DollarSign, Users, FileText, TrendingUp, Clock, Edit3, Save, X, Upload, Download, Trash2, Paperclip, Eye, Hash } from 'lucide-react';
+import { ArrowLeft, Building2, Phone, Mail, MapPin, User, Calendar, Users, FileText, Edit3, Save, X, Upload, Download, Trash2, Paperclip, Eye, Hash, Copy, Check } from 'lucide-react';
 
 const CompanyDetail = ({ company, onClose }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -9,24 +9,21 @@ const CompanyDetail = ({ company, onClose }) => {
     email: 'contact@company.com',
     address: '서울시 강남구 테헤란로 123'
   });
+  const [pmInfo, setPmInfo] = useState(company.pm || { name: '김영업', phone: '010-1111-2222', email: 'sales.kim@duruviter.com' });
+  const [isEditingPm, setIsEditingPm] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
 
   const workers = [
-    { id: 1, name: '김민수', phone: '010-1234-5678', hireDate: '2025-06-15', status: '근무중', disability: '지체장애' },
-    { id: 2, name: '이영희', phone: '010-2345-6789', hireDate: '2025-07-01', status: '근무중', disability: '청각장애' },
-    { id: 3, name: '박철수', phone: '010-3456-7890', hireDate: '2025-08-10', status: '근무중', disability: '시각장애' },
-    { id: 4, name: '정수진', phone: '010-4567-8901', hireDate: '2025-09-01', status: '근무중', disability: '지적장애' },
+    { id: 1, name: '김민수', phone: '010-1234-5678', hireDate: '2025-06-15', workerId: 'ms0315', disability: '지체장애' },
+    { id: 2, name: '이영희', phone: '010-2345-6789', hireDate: '2025-07-01', workerId: 'yh0520', disability: '청각장애' },
+    { id: 3, name: '박철수', phone: '010-3456-7890', hireDate: '2025-08-10', workerId: 'cs1108', disability: '시각장애' },
+    { id: 4, name: '정수진', phone: '010-4567-8901', hireDate: '2025-09-01', workerId: 'sj0723', disability: '지적장애' },
   ];
 
   const uploadedFiles = [
     { id: 1, name: '두루빛터_위탁계약서_2025.pdf', uploadDate: '2025-06-01', size: '2.4 MB' },
     { id: 2, name: '개인정보처리위탁_동의서.pdf', uploadDate: '2025-06-01', size: '1.1 MB' },
     { id: 3, name: '근로자_배치계획서_2026.pdf', uploadDate: '2026-01-10', size: '850 KB' },
-  ];
-
-  const contracts = [
-    { id: 1, type: '월간 정산', period: '2026-01', amount: 12800000, status: '완료', date: '2026-02-05' },
-    { id: 2, type: '월간 정산', period: '2025-12', amount: 12500000, status: '완료', date: '2026-01-05' },
-    { id: 3, type: '월간 정산', period: '2025-11', amount: 12300000, status: '완료', date: '2025-12-05' },
   ];
 
   const handleSaveEdit = () => {
@@ -184,33 +181,96 @@ const CompanyDetail = ({ company, onClose }) => {
               </div>
             </div>
 
-            {/* 통계 카드 */}
+            {/* 영업 담당자 (PM) 카드 */}
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-duru-orange-600" />
-                주요 지표
-              </h3>
-              <div className="space-y-4">
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">근로자 수</span>
-                    <Users className="w-4 h-4 text-blue-600" />
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                  <User className="w-5 h-5 text-duru-orange-600" />
+                  영업 담당자
+                </h3>
+                {!isEditingPm ? (
+                  <button
+                    onClick={() => setIsEditingPm(true)}
+                    className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <Edit3 className="w-4 h-4 text-gray-500" />
+                  </button>
+                ) : (
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setIsEditingPm(false)}
+                      className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <X className="w-4 h-4 text-gray-500" />
+                    </button>
+                    <button
+                      onClick={() => setIsEditingPm(false)}
+                      className="p-1.5 hover:bg-green-100 rounded-lg transition-colors"
+                    >
+                      <Save className="w-4 h-4 text-green-600" />
+                    </button>
                   </div>
-                  <p className="text-2xl font-bold text-blue-600">{company.workerCount}명</p>
+                )}
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-sm">
+                  <User className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600 w-12">이름:</span>
+                  {isEditingPm ? (
+                    <input
+                      type="text"
+                      value={pmInfo.name}
+                      onChange={(e) => setPmInfo({...pmInfo, name: e.target.value})}
+                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                    />
+                  ) : (
+                    <span className="font-semibold text-gray-900">{pmInfo.name}</span>
+                  )}
                 </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">평균 출근율</span>
-                    <Clock className="w-4 h-4 text-green-600" />
-                  </div>
-                  <p className="text-2xl font-bold text-green-600">97.8%</p>
+                <div className="flex items-center gap-3 text-sm">
+                  <Phone className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600 w-12">연락처:</span>
+                  {isEditingPm ? (
+                    <input
+                      type="text"
+                      value={pmInfo.phone}
+                      onChange={(e) => setPmInfo({...pmInfo, phone: e.target.value})}
+                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                    />
+                  ) : (
+                    <span className="font-semibold text-gray-900">{pmInfo.phone}</span>
+                  )}
                 </div>
-                <div className="bg-orange-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">이번 달 정산</span>
-                    <DollarSign className="w-4 h-4 text-orange-600" />
-                  </div>
-                  <p className="text-2xl font-bold text-orange-600">{(company.monthlyRevenue || 12800000).toLocaleString()}원</p>
+                <div className="flex items-center gap-3 text-sm">
+                  <Mail className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-600 w-12">이메일:</span>
+                  {isEditingPm ? (
+                    <input
+                      type="email"
+                      value={pmInfo.email}
+                      onChange={(e) => setPmInfo({...pmInfo, email: e.target.value})}
+                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-900">{pmInfo.email}</span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(pmInfo.email);
+                          setCopiedEmail(true);
+                          setTimeout(() => setCopiedEmail(false), 2000);
+                        }}
+                        className="p-1 hover:bg-gray-100 rounded transition-colors"
+                        title="이메일 복사"
+                      >
+                        {copiedEmail ? (
+                          <Check className="w-3 h-3 text-green-600" />
+                        ) : (
+                          <Copy className="w-3 h-3 text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -233,7 +293,7 @@ const CompanyDetail = ({ company, onClose }) => {
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">전화번호</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">입사일</th>
                       <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">장애유형</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">상태</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">고유번호</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -244,8 +304,8 @@ const CompanyDetail = ({ company, onClose }) => {
                         <td className="px-4 py-3 text-gray-600">{worker.hireDate}</td>
                         <td className="px-4 py-3 text-gray-600">{worker.disability}</td>
                         <td className="px-4 py-3">
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                            {worker.status}
+                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 font-mono">
+                            {worker.workerId}
                           </span>
                         </td>
                       </tr>
@@ -301,47 +361,7 @@ const CompanyDetail = ({ company, onClose }) => {
               </div>
             </div>
 
-            {/* 정산 내역 */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-duru-orange-600" />
-                정산 내역
-              </h3>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">구분</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">기간</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">금액</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">상태</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">처리일</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {contracts.map((contract) => (
-                      <tr key={contract.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-gray-900">{contract.type}</td>
-                        <td className="px-4 py-3 text-gray-600">{contract.period}</td>
-                        <td className="px-4 py-3 text-gray-900 font-semibold">{contract.amount.toLocaleString()}원</td>
-                        <td className="px-4 py-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            contract.status === '완료' ? 'bg-green-100 text-green-700' :
-                            contract.status === '대기' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
-                          }`}>
-                            {contract.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-gray-600">{contract.date}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+                      </div>
         </div>
       </div>
     </div>
