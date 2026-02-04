@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Users, Building2, TrendingUp, AlertCircle, DollarSign, FileText, Search, Bell, Calendar, UserCheck, Clock, ChevronRight, Edit, Eye, Download, Upload, MessageSquare, Filter, Save, X, Check, ChevronDown, ChevronUp, BarChart3, Printer, Lock, CheckCircle2, Mail, Phone, MapPin, User } from 'lucide-react';
+import { ArrowLeft, Users, Building2, TrendingUp, AlertCircle, DollarSign, FileText, Search, Bell, Calendar, UserCheck, Clock, ChevronRight, Edit, Eye, Download, Upload, Filter, Save, X, Check, ChevronDown, ChevronUp, BarChart3, Printer, Lock, CheckCircle2, Mail, Phone, MapPin, User } from 'lucide-react';
 import AdminWorkerDetail from './AdminWorkerDetail';
 import CompanyDetail from './CompanyDetail';
 
@@ -16,7 +16,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 0, 28)); // 2026-01-28
   const [selectedTimeSlot, setSelectedTimeSlot] = useState({}); // 회사별 오전/오후 선택
   const [printPreview, setPrintPreview] = useState(null); // {companyName, workers}
-  const [showCalendar, setShowCalendar] = useState(false);
   const [editingPreviewCell, setEditingPreviewCell] = useState(null); // {workerId, field}
   const [previewEditValue, setPreviewEditValue] = useState('');
   const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
@@ -33,26 +32,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
   const [addCompanyComplete, setAddCompanyComplete] = useState({});
   const [editingRevenue, setEditingRevenue] = useState(null); // {companyId: number}
   const [revenueEditValue, setRevenueEditValue] = useState('');
-  const [selectedCompaniesForNotice, setSelectedCompaniesForNotice] = useState([]);
-  const [noticeContent, setNoticeContent] = useState('');
-  const [companySearchQuery, setCompanySearchQuery] = useState('');
-  const [expandedNotices, setExpandedNotices] = useState(new Set());
-  const [sentNotices, setSentNotices] = useState([
-    {
-      id: 1,
-      date: '2026-02-02 14:30',
-      companies: ['(주)두루빛 제조', '세종식품', '한빛포장', '그린팜', '참좋은케어'],
-      content: '폭설로 인해 금일 출근이 제한됩니다.\n안전을 위해 자택 대기 바랍니다.',
-      sender: '관리자'
-    },
-    {
-      id: 2,
-      date: '2026-01-28 09:15',
-      companies: ['그린팜', '참좋은케어'],
-      content: '2월 근무 일정표가 변경되었습니다.\n기업 관리자에게 확인 바랍니다.',
-      sender: '관리자'
-    }
-  ]);
   const [hasNewNotification, setHasNewNotification] = useState(true);
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [inquiryList, setInquiryList] = useState([
@@ -93,7 +72,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
     { id: 3, name: '한빛포장', industry: '포장/물류', location: '인천 남동구', workers: 18, contractEnd: '2027-06-30', status: 'active', revenue: 5400000 },
     { id: 4, name: '그린팜', industry: '농업', location: '충남 천안시', workers: 8, contractEnd: '2026-02-28', status: 'expiring', revenue: 2400000 },
     { id: 5, name: '참좋은케어', industry: '서비스업', location: '서울 송파구', workers: 10, contractEnd: '2026-09-15', status: 'active', revenue: 3000000 },
-    { id: 6, name: '지원 의원', industry: '의료', location: '경기 성남시', workers: 10, contractEnd: '2027-01-31', status: 'active', revenue: 3000000 },
   ]);
 
   const updateAddCompanyForm = (field, value) => {
@@ -263,46 +241,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
     setSelectedDate(newDate);
   };
 
-  const changeMonth = (offset) => {
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const newDate = new Date(year, month - 1 + offset, 1);
-    const newYear = newDate.getFullYear();
-    const newMonth = String(newDate.getMonth() + 1).padStart(2, '0');
-    setSelectedMonth(`${newYear}-${newMonth}`);
-  };
-
-  const formatMonthDisplay = (monthString) => {
-    const [year, month] = monthString.split('-');
-    return `${year}년 ${month}월`;
-  };
-
-  // 캘린더 헬퍼 함수들
-  const getDaysInMonth = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    return new Date(year, month, 1).getDay();
-  };
-
-  const isSameDay = (date1, date2) => {
-    return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
-  };
-
-  const handleCalendarDateSelect = (day) => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
-    const newDate = new Date(year, month, day);
-    setSelectedDate(newDate);
-    setShowCalendar(false);
-  };
-
   const getAttendanceStatus = (worker) => {
     if (worker.checkin === '-') return '출근 전';
     if (worker.checkout === '-') return '출근 중';
@@ -327,23 +265,24 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
   // 근무 통계 데이터 (월별 근무시간)
   const [monthlyWorkStats, setMonthlyWorkStats] = useState({
     '(주)두루빛 제조': [
-      { id: 1, name: '김민수', department: '제조부', workSchedule: '월, 화, 수, 목, 금', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
-      { id: 2, name: '이영희', department: '포장부', workSchedule: '월, 화, 수, 목, 금', totalHours: 168, avgHours: 7.6, workDays: 22, lateDays: 1 },
-      { id: 7, name: '김수진', department: '제조부', workSchedule: '화, 수, 목, 금, 토', totalHours: 172, avgHours: 7.8, workDays: 22, lateDays: 0 },
-      { id: 16, name: '박영수', department: '포장부', workSchedule: '월, 화, 수, 목, 금', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
-      { id: 17, name: '최지현', department: '제조부', workSchedule: '월, 수, 금', totalHours: 170, avgHours: 7.7, workDays: 22, lateDays: 1 },
+      { id: 1, name: '김민수', department: '제조부', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
+      { id: 2, name: '이영희', department: '포장부', totalHours: 168, avgHours: 7.6, workDays: 22, lateDays: 1 },
+      { id: 7, name: '김수진', department: '제조부', totalHours: 172, avgHours: 7.8, workDays: 22, lateDays: 0 },
+      { id: 16, name: '박영수', department: '포장부', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
+      { id: 17, name: '최지현', department: '제조부', totalHours: 170, avgHours: 7.7, workDays: 22, lateDays: 1 },
+      { id: 18, name: '정민아', department: '품질관리', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
     ],
     '세종식품': [
-      { id: 3, name: '박철수', department: '생산부', workSchedule: '월, 화, 수, 목, 금', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
-      { id: 8, name: '이민호', department: '생산부', workSchedule: '화, 수, 목, 금, 토', totalHours: 160, avgHours: 7.3, workDays: 22, lateDays: 3 },
+      { id: 3, name: '박철수', department: '생산부', totalHours: 180, avgHours: 8.2, workDays: 22, lateDays: 0 },
+      { id: 8, name: '이민호', department: '생산부', totalHours: 160, avgHours: 7.3, workDays: 22, lateDays: 3 },
     ],
     '한빛포장': [
-      { id: 4, name: '정미라', department: '품질관리', workSchedule: '월, 화, 수, 목, 금', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 2 },
-      { id: 9, name: '박지영', department: '포장부', workSchedule: '월, 화, 목', totalHours: 175, avgHours: 8.0, workDays: 22, lateDays: 0 },
+      { id: 4, name: '정미라', department: '품질관리', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 2 },
+      { id: 9, name: '박지영', department: '포장부', totalHours: 175, avgHours: 8.0, workDays: 22, lateDays: 0 },
     ],
     '그린팜': [
-      { id: 5, name: '최동욱', department: '재배', workSchedule: '월, 화, 수, 목, 금', totalHours: 140, avgHours: 6.4, workDays: 22, lateDays: 5 },
-      { id: 10, name: '강태민', department: '재배', workSchedule: '화, 수, 목, 금, 토', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
+      { id: 5, name: '최동욱', department: '재배', totalHours: 140, avgHours: 6.4, workDays: 22, lateDays: 5 },
+      { id: 10, name: '강태민', department: '재배', totalHours: 176, avgHours: 8.0, workDays: 22, lateDays: 0 },
     ],
   });
 
@@ -375,71 +314,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
     setPreviewEditValue('');
   };
 
-  const toggleCompanyForNotice = (companyId) => {
-    setSelectedCompaniesForNotice(prev =>
-      prev.includes(companyId)
-        ? prev.filter(id => id !== companyId)
-        : [...prev, companyId]
-    );
-  };
-
-  const toggleAllCompaniesForNotice = () => {
-    if (selectedCompaniesForNotice.length === companiesData.length) {
-      setSelectedCompaniesForNotice([]);
-    } else {
-      setSelectedCompaniesForNotice(companiesData.map(c => c.id));
-    }
-  };
-
-  const toggleNoticeExpand = (noticeId) => {
-    setExpandedNotices(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(noticeId)) {
-        newSet.delete(noticeId);
-      } else {
-        newSet.add(noticeId);
-      }
-      return newSet;
-    });
-  };
-
-  const handleSendNotice = () => {
-    if (selectedCompaniesForNotice.length === 0 || !noticeContent.trim()) {
-      return;
-    }
-
-    // 선택된 회사 이름 배열 생성
-    const selectedCompanyNames = companiesData
-      .filter(c => selectedCompaniesForNotice.includes(c.id))
-      .map(c => c.name);
-
-    // 새 공지사항 기록 추가
-    const newNotice = {
-      id: Date.now(),
-      date: new Date().toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      }).replace(/\. /g, '-').replace('.', ''),
-      companies: selectedCompanyNames,
-      content: noticeContent,
-      sender: '관리자'
-    };
-
-    setSentNotices(prev => [newNotice, ...prev]);
-
-    // 실제로는 여기서 API 호출
-    console.log('공지사항 발송:', newNotice);
-
-    // 초기화
-    setSelectedCompaniesForNotice([]);
-    setNoticeContent('');
-    setCompanySearchQuery('');
-    alert('공지사항이 성공적으로 발송되었습니다!');
-  };
 
   // 상세보기 페이지 렌더링
   if (selectedWorker) {
@@ -487,7 +361,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
               { id: 'companies', label: '회원사 관리', icon: Building2 },
               { id: 'workers', label: '근로자 관리', icon: Users },
               { id: 'workstats', label: '근무 통계', icon: BarChart3 },
-              { id: 'notices', label: '공지사항', icon: MessageSquare },
               { id: 'notifications', label: '알림센터', icon: Bell },
               { id: 'reports', label: '리포트', icon: FileText }
             ].map(tab => (
@@ -609,7 +482,7 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                     <Clock className="w-6 h-6 text-duru-orange-600" />
                     출퇴근 현황 (회사별)
                   </h2>
-                  <div className="flex items-center gap-2 relative">
+                  <div className="flex items-center gap-4">
                     <button
                       onClick={() => changeDate(-1)}
                       className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -617,15 +490,15 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                     >
                       <ChevronDown className="w-5 h-5 rotate-90" />
                     </button>
-                    <button
-                      onClick={() => setShowCalendar(!showCalendar)}
-                      className="flex items-center gap-2 px-4 py-2 border-2 border-duru-orange-500 rounded-lg bg-duru-orange-50 hover:bg-duru-orange-100 transition-colors cursor-pointer"
-                    >
+                    <div className="flex items-center gap-2">
                       <Calendar className="w-5 h-5 text-duru-orange-600" />
-                      <span className="text-duru-orange-600 font-bold min-w-[180px] text-center">
-                        {formatDate(selectedDate)}
-                      </span>
-                    </button>
+                      <input
+                        type="date"
+                        value={selectedDate.toISOString().split('T')[0]}
+                        onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                        className="px-4 py-2 border-2 border-duru-orange-500 rounded-lg bg-duru-orange-50 text-duru-orange-600 font-bold focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                      />
+                    </div>
                     <button
                       onClick={() => changeDate(1)}
                       className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -633,103 +506,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                     >
                       <ChevronDown className="w-5 h-5 -rotate-90" />
                     </button>
-
-                    {/* 캘린더 드롭다운 */}
-                    {showCalendar && (
-                      <div className="absolute top-full right-0 mt-2 bg-white rounded-xl border-2 border-duru-orange-500 shadow-xl z-50 p-4 w-80">
-                        <div className="flex items-center justify-between mb-4">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newDate = new Date(selectedDate);
-                              newDate.setMonth(newDate.getMonth() - 1);
-                              setSelectedDate(newDate);
-                            }}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                          >
-                            <ChevronDown className="w-5 h-5 text-gray-600 rotate-90" />
-                          </button>
-                          <span className="text-lg font-bold text-gray-900">
-                            {selectedDate.getFullYear()}년 {String(selectedDate.getMonth() + 1).padStart(2, '0')}월
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newDate = new Date(selectedDate);
-                              newDate.setMonth(newDate.getMonth() + 1);
-                              setSelectedDate(newDate);
-                            }}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                          >
-                            <ChevronDown className="w-5 h-5 text-gray-600 -rotate-90" />
-                          </button>
-                        </div>
-
-                        {/* 요일 헤더 */}
-                        <div className="grid grid-cols-7 gap-1 mb-2">
-                          {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
-                            <div key={day} className={`text-center text-sm font-bold py-2 ${idx === 0 ? 'text-red-500' : idx === 6 ? 'text-blue-500' : 'text-gray-600'}`}>
-                              {day}
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* 날짜 그리드 */}
-                        <div className="grid grid-cols-7 gap-1">
-                          {(() => {
-                            const daysInMonth = getDaysInMonth(selectedDate);
-                            const firstDay = getFirstDayOfMonth(selectedDate);
-                            const days = [];
-
-                            // 빈 칸 추가
-                            for (let i = 0; i < firstDay; i++) {
-                              days.push(<div key={`empty-${i}`} className="aspect-square" />);
-                            }
-
-                            // 날짜 추가
-                            for (let day = 1; day <= daysInMonth; day++) {
-                              const currentDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day);
-                              const isSelected = isSameDay(currentDate, selectedDate);
-                              const isToday = isSameDay(currentDate, new Date());
-                              const dayOfWeek = currentDate.getDay();
-
-                              days.push(
-                                <button
-                                  key={day}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleCalendarDateSelect(day);
-                                  }}
-                                  className={`aspect-square flex items-center justify-center rounded-lg text-sm font-semibold transition-all ${
-                                    isSelected
-                                      ? 'bg-duru-orange-500 text-white'
-                                      : isToday
-                                      ? 'bg-blue-100 text-blue-600 border-2 border-blue-400'
-                                      : 'hover:bg-gray-100 text-gray-700'
-                                  } ${dayOfWeek === 0 ? 'text-red-500' : dayOfWeek === 6 ? 'text-blue-500' : ''}`}
-                                >
-                                  {day}
-                                </button>
-                              );
-                            }
-
-                            return days;
-                          })()}
-                        </div>
-
-                        {/* 오늘 버튼 */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedDate(new Date());
-                            setShowCalendar(false);
-                          }}
-                          className="w-full mt-4 py-2 bg-duru-orange-500 text-white rounded-lg font-semibold hover:bg-duru-orange-600 transition-colors"
-                        >
-                          오늘
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -1177,26 +953,13 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => changeMonth(-1)}
-                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    title="이전 달"
-                  >
-                    <ChevronDown className="w-5 h-5 rotate-90" />
-                  </button>
-                  <div className="flex items-center gap-2 px-4 py-2 border-2 border-duru-orange-500 rounded-lg bg-duru-orange-50">
-                    <Calendar className="w-5 h-5 text-duru-orange-600" />
-                    <span className="text-duru-orange-600 font-bold min-w-[100px] text-center">
-                      {formatMonthDisplay(selectedMonth)}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => changeMonth(1)}
-                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    title="다음 달"
-                  >
-                    <ChevronDown className="w-5 h-5 -rotate-90" />
-                  </button>
+                  <Calendar className="w-5 h-5 text-duru-orange-600" />
+                  <input
+                    type="month"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="px-4 py-2 border-2 border-duru-orange-500 rounded-lg bg-duru-orange-50 text-duru-orange-600 font-bold focus:outline-none focus:ring-2 focus:ring-duru-orange-500"
+                  />
                 </div>
               </div>
             </div>
@@ -1262,7 +1025,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                               <tr>
                                 <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">이름</th>
                                 <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">전화번호</th>
-                                <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">근무요일</th>
                                 <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">출근 일수</th>
                                 <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">총 근무시간</th>
                               </tr>
@@ -1272,7 +1034,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                                 <tr key={worker.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                                   <td className="px-4 py-3 font-semibold text-gray-900 border border-gray-300">{worker.name}</td>
                                   <td className="px-4 py-3 text-gray-700 border border-gray-300">{worker.phone}</td>
-                                  <td className="px-4 py-3 text-center text-gray-700 border border-gray-300">{worker.workSchedule}</td>
                                   <td className="px-4 py-3 text-center text-gray-900 border border-gray-300">
                                     {editingPreviewCell?.companyName === companyName &&
                                      editingPreviewCell?.workerId === worker.id &&
@@ -1384,204 +1145,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                   </div>
                 );
               })}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'notices' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <MessageSquare className="w-7 h-7 text-duru-orange-600" />
-                공지사항 관리
-              </h2>
-            </div>
-
-            {/* 공지사항 발송 섹션 */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <Bell className="w-6 h-6 text-duru-orange-600" />
-                새 공지사항 발송
-              </h3>
-
-              {/* 회사 선택 */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-duru-orange-600" />
-                    발송 대상 회원사
-                  </h4>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={toggleAllCompaniesForNotice}
-                      className="px-4 py-2 bg-duru-orange-50 text-duru-orange-600 rounded-lg font-semibold hover:bg-duru-orange-100 transition-colors border border-duru-orange-200 text-sm"
-                    >
-                      {selectedCompaniesForNotice.length === companiesData.length ? '전체 해제' : '전체 선택'}
-                    </button>
-                  </div>
-                </div>
-
-                {/* 검색 바 */}
-                <div className="relative mb-4">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="회사명, 지역, 업종으로 검색..."
-                    value={companySearchQuery}
-                    onChange={(e) => setCompanySearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent placeholder:text-gray-400"
-                  />
-                </div>
-
-                {/* 회사 목록 - 컴팩트한 체크박스 리스트 */}
-                <div className="border-2 border-gray-200 rounded-lg max-h-72 overflow-y-auto">
-                  {companiesData
-                    .filter(company =>
-                      company.name.toLowerCase().includes(companySearchQuery.toLowerCase()) ||
-                      company.industry.toLowerCase().includes(companySearchQuery.toLowerCase()) ||
-                      company.location.toLowerCase().includes(companySearchQuery.toLowerCase())
-                    )
-                    .map((company, index, array) => (
-                      <label
-                        key={company.id}
-                        className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
-                          selectedCompaniesForNotice.includes(company.id)
-                            ? 'bg-duru-orange-50'
-                            : 'hover:bg-gray-50'
-                        } ${index !== array.length - 1 ? 'border-b border-gray-200' : ''}`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedCompaniesForNotice.includes(company.id)}
-                          onChange={() => toggleCompanyForNotice(company.id)}
-                          className="w-5 h-5 text-duru-orange-600 rounded focus:ring-duru-orange-500"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-gray-900 truncate">{company.name}</p>
-                          <p className="text-sm text-gray-600 truncate">{company.industry} · {company.location}</p>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-sm font-semibold text-duru-orange-600">{company.workers}명</p>
-                        </div>
-                      </label>
-                    ))
-                  }
-                  {companiesData.filter(company =>
-                    company.name.toLowerCase().includes(companySearchQuery.toLowerCase()) ||
-                    company.industry.toLowerCase().includes(companySearchQuery.toLowerCase()) ||
-                    company.location.toLowerCase().includes(companySearchQuery.toLowerCase())
-                  ).length === 0 && (
-                    <div className="px-4 py-8 text-center text-gray-400">
-                      검색 결과가 없습니다
-                    </div>
-                  )}
-                </div>
-
-                {/* 선택 요약 */}
-                {selectedCompaniesForNotice.length > 0 && (
-                  <div className="mt-4 bg-duru-orange-50 rounded-lg p-4 border border-duru-orange-200">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-gray-900">선택된 회원사</p>
-                      <p className="text-lg font-bold text-duru-orange-600">
-                        {selectedCompaniesForNotice.length}개 회원사 · 총 {companiesData.filter(c => selectedCompaniesForNotice.includes(c.id)).reduce((sum, c) => sum + c.workers, 0)}명
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 공지사항 작성 */}
-              <div className="mb-6">
-                <h4 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <Edit className="w-5 h-5 text-duru-orange-600" />
-                  공지사항 내용
-                </h4>
-                <textarea
-                  value={noticeContent}
-                  onChange={(e) => setNoticeContent(e.target.value)}
-                  placeholder="근로자들에게 전달할 공지사항을 작성해주세요.&#10;&#10;예)&#10;폭설로 인해 금일 출근이 제한됩니다.&#10;안전을 위해 자택 대기 바랍니다."
-                  rows={8}
-                  className="w-full px-5 py-4 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent resize-none placeholder:text-gray-400 leading-relaxed"
-                />
-              </div>
-
-              {/* 발송 버튼 */}
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  onClick={() => {
-                    setSelectedCompaniesForNotice([]);
-                    setNoticeContent('');
-                    setCompanySearchQuery('');
-                  }}
-                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
-                >
-                  초기화
-                </button>
-                <button
-                  onClick={handleSendNotice}
-                  disabled={selectedCompaniesForNotice.length === 0 || !noticeContent.trim()}
-                  className="px-8 py-3 bg-duru-orange-500 text-white rounded-lg font-bold text-lg hover:bg-duru-orange-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  <Bell className="w-5 h-5" />
-                  발송하기
-                </button>
-              </div>
-            </div>
-
-            {/* 발송 기록 섹션 */}
-            <div className="bg-white rounded-xl border border-gray-200">
-              <div className="px-6 py-5 border-b border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <FileText className="w-6 h-6 text-duru-orange-600" />
-                  발송 기록
-                </h3>
-              </div>
-
-              <div className="divide-y divide-gray-200">
-                {sentNotices.length === 0 ? (
-                  <div className="px-6 py-12 text-center">
-                    <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-400">발송한 공지사항이 없습니다</p>
-                  </div>
-                ) : (
-                  sentNotices.map((notice) => {
-                    const isExpanded = expandedNotices.has(notice.id);
-                    const displayedCompanies = isExpanded ? notice.companies : notice.companies.slice(0, 3);
-
-                    return (
-                      <div key={notice.id} className="px-6 py-5 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="text-sm font-semibold text-duru-orange-600">{notice.date}</span>
-                              <span className="text-sm text-gray-500">발송자: {notice.sender}</span>
-                            </div>
-                            <div className="flex items-center gap-2 flex-wrap mb-3">
-                              <span className="text-sm font-semibold text-gray-700">발송 대상:</span>
-                              {displayedCompanies.map((company, idx) => (
-                                <span key={idx} className="inline-flex items-center px-2.5 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium">
-                                  {company}
-                                </span>
-                              ))}
-                              {notice.companies.length > 3 && (
-                                <button
-                                  onClick={() => toggleNoticeExpand(notice.id)}
-                                  className="inline-flex items-center px-2.5 py-1 bg-duru-orange-100 text-duru-orange-700 rounded-md text-sm font-semibold hover:bg-duru-orange-200 transition-colors"
-                                >
-                                  {isExpanded ? '접기' : `+${notice.companies.length - 3}개 더보기`}
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                          <p className="text-gray-900 whitespace-pre-line leading-relaxed">{notice.content}</p>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
             </div>
           </div>
         )}
@@ -1799,7 +1362,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                     <tr>
                       <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">이름</th>
                       <th className="px-4 py-3 text-left text-sm font-bold text-gray-900 border border-gray-300">전화번호</th>
-                      <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">근무요일</th>
                       <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">출근 일수</th>
                       <th className="px-4 py-3 text-center text-sm font-bold text-gray-900 border border-gray-300">총 근무시간</th>
                     </tr>
@@ -1809,7 +1371,6 @@ const AdminDashboard = ({ onClose, newInquiries = [], clearNewInquiries }) => {
                       <tr key={worker.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                         <td className="px-4 py-3 font-semibold text-gray-900 border border-gray-300">{worker.name}</td>
                         <td className="px-4 py-3 text-gray-700 border border-gray-300">{worker.phone}</td>
-                        <td className="px-4 py-3 text-center text-gray-700 border border-gray-300">{worker.workSchedule}</td>
                         <td className="px-4 py-3 text-center text-gray-900 border border-gray-300">{worker.workDays}일</td>
                         <td className="px-4 py-3 text-center font-bold text-blue-600 border border-gray-300">{worker.totalHours}h</td>
                       </tr>
