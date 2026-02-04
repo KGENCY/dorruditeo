@@ -197,8 +197,8 @@ const EmployeeDetail = ({ employee, onClose, onResign }) => {
               </h3>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600">유형 및 등급</span>
-                  <span className="font-bold text-gray-900">{employee.disability || '지체장애 3급'}</span>
+                  <span className="text-gray-600">유형</span>
+                  <span className="font-bold text-gray-900">{(employee.disability || '지체장애 3급').split(' ')[0]}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-gray-600">중증/경증</span>
