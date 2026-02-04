@@ -104,8 +104,18 @@ const AttendanceApp = ({ onClose }) => {
     }
   ]);
 
+  // 퇴사자 고유번호 목록 (실제로는 서버에서 관리)
+  const resignedWorkerIds = ['DW3456', 'DW5678']; // 퇴사자 고유번호
+  const [loginError, setLoginError] = useState('');
+
   const handleLogin = () => {
     if (employeeId.length >= 4 && employeeId.length <= 6) {
+      // 퇴사자 체크
+      if (resignedWorkerIds.includes(employeeId.toUpperCase())) {
+        setLoginError('퇴사 처리된 계정입니다. 출퇴근 서비스를 이용할 수 없습니다.');
+        return;
+      }
+      setLoginError('');
       setUserName('홍길동'); // 실제로는 서버에서 받아올 데이터
       setStep('main');
     }
@@ -217,12 +227,21 @@ const AttendanceApp = ({ onClose }) => {
                   type="text"
                   placeholder="예) JH1234"
                   value={employeeId}
-                  onChange={(e) => setEmployeeId(e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 10))}
+                  onChange={(e) => {
+                    setEmployeeId(e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 10));
+                    setLoginError(''); // 입력 시 에러 메시지 초기화
+                  }}
                   onKeyDown={(e) => { if (e.key === 'Enter' && isValidId) handleLogin(); }}
                   maxLength={10}
                   autoFocus
-                  className="w-full px-4 py-4 border border-gray-300 rounded-lg text-2xl text-center tracking-[0.3em] font-semibold placeholder:text-base placeholder:font-normal placeholder:tracking-normal placeholder:text-gray-500 placeholder:text-center focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent"
+                  className={`w-full px-4 py-4 border rounded-lg text-2xl text-center tracking-[0.3em] font-semibold placeholder:text-base placeholder:font-normal placeholder:tracking-normal placeholder:text-gray-500 placeholder:text-center focus:outline-none focus:ring-2 focus:ring-duru-orange-500 focus:border-transparent ${loginError ? 'border-red-500' : 'border-gray-300'}`}
                 />
+                {loginError && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+                    <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-700">{loginError}</p>
+                  </div>
+                )}
               </div>
 
               <button

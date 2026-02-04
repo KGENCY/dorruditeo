@@ -153,14 +153,36 @@ const CompanyDashboard = ({ onClose }) => {
     '호흡기장애', '간장애', '안면장애', '장루·요루장애', '간질장애'
   ];
 
-  // 더미 데이터
-  const employees = [
-    { id: 1, name: '김민수', phone: '010-1234-5678', disability: '지체장애 3급', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:00', checkoutTime: null },
-    { id: 2, name: '이영희', phone: '010-2345-6789', disability: '청각장애 2급', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:15', checkoutTime: null },
-    { id: 3, name: '박철수', phone: '010-3456-7890', disability: '시각장애 4급', contractEnd: '2026-03-15', status: 'checkout', checkinTime: '09:00', checkoutTime: '18:00' },
-    { id: 4, name: '정미라', phone: '010-4567-8901', disability: '지체장애 2급', contractEnd: '2027-06-30', status: 'checkin', checkinTime: '08:45', checkoutTime: null },
-    { id: 5, name: '최동욱', phone: '010-5678-9012', disability: '발달장애 3급', contractEnd: '2026-02-28', status: 'absent', checkinTime: null, checkoutTime: null },
-  ];
+  // 더미 데이터 (입사일, 퇴사 정보 포함) - 상태로 관리
+  const [employeesData, setEmployeesData] = useState([
+    { id: 1, name: '김민수', phone: '010-1234-5678', disability: '지체장애 3급', hireDate: '2025-03-01', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:00', checkoutTime: null, workerId: 'ms0315', notes: '성실하고 꼼꼼함. 품질 검수 업무에 적합', isResigned: false, resignDate: null, resignReason: null },
+    { id: 2, name: '이영희', phone: '010-2345-6789', disability: '청각장애 2급', hireDate: '2025-06-15', contractEnd: '2026-12-31', status: 'checkin', checkinTime: '09:15', checkoutTime: null, workerId: 'yh0520', notes: '수화 가능. 포장 작업 숙련도 높음', isResigned: false, resignDate: null, resignReason: null },
+    { id: 3, name: '박철수', phone: '010-3456-7890', disability: '시각장애 4급', hireDate: '2025-08-01', contractEnd: '2026-03-15', status: 'checkout', checkinTime: '09:00', checkoutTime: '18:00', workerId: 'cs1108', notes: '보조기기 사용. 단순 조립 업무 담당', isResigned: false, resignDate: null, resignReason: null },
+    { id: 4, name: '정미라', phone: '010-4567-8901', disability: '지체장애 2급', hireDate: '2025-09-01', contractEnd: '2027-06-30', status: 'checkin', checkinTime: '08:45', checkoutTime: null, workerId: 'mr0723', notes: '휠체어 사용. 사무 보조 업무 가능', isResigned: false, resignDate: null, resignReason: null },
+    { id: 5, name: '최동욱', phone: '010-5678-9012', disability: '발달장애 3급', hireDate: '2025-11-01', contractEnd: '2026-01-22', status: 'resigned', checkinTime: null, checkoutTime: null, workerId: 'dw0412', notes: '반복 작업 능숙. 재배 작업 담당했음', isResigned: true, resignDate: '2026-01-22', resignReason: '개인 사유로 인한 자진 퇴사' },
+  ]);
+
+  // 퇴사 처리 함수
+  const handleEmployeeResign = (employeeId, resignDate, resignReason) => {
+    setEmployeesData(prev => prev.map(emp =>
+      emp.id === employeeId
+        ? { ...emp, isResigned: true, status: 'resigned', resignDate, resignReason }
+        : emp
+    ));
+  };
+
+  // 기존 employees 변수 유지 (호환성)
+  const employees = employeesData;
+
+  // 특정 날짜 기준 소속 근로자 수 계산 (입사일 <= 해당날짜 <= 퇴사일인 근로자 수)
+  const getActiveWorkersCount = (year, month, day) => {
+    const targetDate = new Date(year, month, day);
+    return employees.filter(emp => {
+      const hireDate = new Date(emp.hireDate);
+      const endDate = new Date(emp.contractEnd);
+      return hireDate <= targetDate && targetDate <= endDate;
+    }).length;
+  };
 
   const todayStats = {
     total: 15,
@@ -224,7 +246,7 @@ const CompanyDashboard = ({ onClose }) => {
 
   // 근로자 상세보기가 선택되면 EmployeeDetail 컴포넌트 표시
   if (selectedEmployee) {
-    return <EmployeeDetail employee={selectedEmployee} onClose={() => setSelectedEmployee(null)} />;
+    return <EmployeeDetail employee={selectedEmployee} onClose={() => setSelectedEmployee(null)} onResign={handleEmployeeResign} />;
   }
 
   return (
@@ -529,29 +551,29 @@ const CompanyDashboard = ({ onClose }) => {
 
                   // 더미 일정 데이터 - 28일 이전 평일은 채워져있고, 29일 이후는 빈칸 (파란 계열로 통일)
                   const schedules = {
-                    '2': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-blue-50 border-blue-300' },
-                    '3': { workType: '포장 작업', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-sky-50 border-sky-300' },
-                    '5': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-blue-50 border-blue-300' },
-                    '6': { workType: '재고 정리', startTime: '10:00', endTime: '16:00', workers: 5, color: 'bg-cyan-50 border-cyan-300' },
-                    '7': { workType: '품질 검사', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-blue-50 border-blue-300' },
-                    '8': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-sky-50 border-sky-300' },
-                    '9': { workType: '배송 준비', startTime: '09:00', endTime: '17:00', workers: 4, color: 'bg-cyan-50 border-cyan-300' },
-                    '10': { workType: '포장 작업', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-blue-50 border-blue-300' },
-                    '12': { workType: '제품 검수', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-sky-50 border-sky-300' },
-                    '13': { workType: '재고 정리', startTime: '10:00', endTime: '16:00', workers: 5, color: 'bg-cyan-50 border-cyan-300' },
-                    '14': { workType: '기계 점검', startTime: '13:00', endTime: '17:00', workers: 3, color: 'bg-blue-50 border-blue-300' },
-                    '15': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-sky-50 border-sky-300' },
-                    '16': { workType: '품질 검사', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-cyan-50 border-cyan-300' },
-                    '17': { workType: '포장 작업', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-blue-50 border-blue-300' },
-                    '19': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-sky-50 border-sky-300' },
-                    '20': { workType: '제품 검수', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-cyan-50 border-cyan-300' },
-                    '21': { workType: '배송 준비', startTime: '09:00', endTime: '17:00', workers: 5, color: 'bg-blue-50 border-blue-300' },
-                    '22': { workType: '재고 정리', startTime: '10:00', endTime: '16:00', workers: 4, color: 'bg-sky-50 border-sky-300' },
-                    '23': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-cyan-50 border-cyan-300' },
-                    '24': { workType: '포장 작업', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-blue-50 border-blue-300' },
-                    '26': { workType: '품질 검사', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-sky-50 border-sky-300' },
-                    '27': { workType: '품질 검사', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-cyan-50 border-cyan-300' },
-                    '28': { workType: '제품 조립', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-blue-50 border-blue-300' },
+                    '2': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-blue-50 border-blue-300' },
+                    '3': { workType: '업무 지시서', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-sky-50 border-sky-300' },
+                    '5': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-blue-50 border-blue-300' },
+                    '6': { workType: '업무 지시서', startTime: '10:00', endTime: '16:00', workers: 5, color: 'bg-cyan-50 border-cyan-300' },
+                    '7': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-blue-50 border-blue-300' },
+                    '8': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-sky-50 border-sky-300' },
+                    '9': { workType: '업무 지시서', startTime: '09:00', endTime: '17:00', workers: 4, color: 'bg-cyan-50 border-cyan-300' },
+                    '10': { workType: '업무 지시서', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-blue-50 border-blue-300' },
+                    '12': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-sky-50 border-sky-300' },
+                    '13': { workType: '업무 지시서', startTime: '10:00', endTime: '16:00', workers: 5, color: 'bg-cyan-50 border-cyan-300' },
+                    '14': { workType: '업무 지시서', startTime: '13:00', endTime: '17:00', workers: 3, color: 'bg-blue-50 border-blue-300' },
+                    '15': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-sky-50 border-sky-300' },
+                    '16': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-cyan-50 border-cyan-300' },
+                    '17': { workType: '업무 지시서', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-blue-50 border-blue-300' },
+                    '19': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-sky-50 border-sky-300' },
+                    '20': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-cyan-50 border-cyan-300' },
+                    '21': { workType: '업무 지시서', startTime: '09:00', endTime: '17:00', workers: 5, color: 'bg-blue-50 border-blue-300' },
+                    '22': { workType: '업무 지시서', startTime: '10:00', endTime: '16:00', workers: 4, color: 'bg-sky-50 border-sky-300' },
+                    '23': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-cyan-50 border-cyan-300' },
+                    '24': { workType: '업무 지시서', startTime: '09:00', endTime: '17:00', workers: 6, color: 'bg-blue-50 border-blue-300' },
+                    '26': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-sky-50 border-sky-300' },
+                    '27': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 8, color: 'bg-cyan-50 border-cyan-300' },
+                    '28': { workType: '업무 지시서', startTime: '09:00', endTime: '18:00', workers: 7, color: 'bg-blue-50 border-blue-300' },
                   };
 
                   // 이전 달 빈 셀
@@ -590,9 +612,9 @@ const CompanyDashboard = ({ onClose }) => {
                             }`}>
                               {date}
                             </span>
-                            {schedule && (
+                            {!isWeekend && (
                               <span className="text-xs bg-white px-2 py-0.5 rounded-full font-semibold text-gray-700 border">
-                                {schedule.workers}명
+                                {getActiveWorkersCount(year, month, date)}명
                               </span>
                             )}
                           </div>
@@ -600,10 +622,6 @@ const CompanyDashboard = ({ onClose }) => {
                           {schedule && (
                             <div className="flex-1 flex flex-col gap-1">
                               <p className="text-sm font-bold text-gray-900 line-clamp-2">{schedule.workType}</p>
-                              <div className="flex items-center gap-1 text-xs text-gray-600">
-                                <Clock className="w-3 h-3" />
-                                <span>{schedule.startTime} - {schedule.endTime}</span>
-                              </div>
                             </div>
                           )}
 

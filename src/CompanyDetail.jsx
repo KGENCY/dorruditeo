@@ -9,9 +9,27 @@ const CompanyDetail = ({ company, onClose }) => {
     email: 'contact@company.com',
     address: '서울시 강남구 테헤란로 123'
   });
+  // 영업 담당자 (PM) 정보 상태
   const [pmInfo, setPmInfo] = useState(company.pm || { name: '김영업', phone: '010-1111-2222', email: 'sales.kim@duruviter.com' });
   const [isEditingPm, setIsEditingPm] = useState(false);
+  const [editedPm, setEditedPm] = useState({ name: '', phone: '', email: '' });
   const [copiedEmail, setCopiedEmail] = useState(false);
+
+  const handleEditPm = () => {
+    setEditedPm({ name: pmInfo.name, phone: pmInfo.phone, email: pmInfo.email });
+    setIsEditingPm(true);
+  };
+
+  const handleSavePm = () => {
+    setPmInfo({ ...editedPm });
+    setIsEditingPm(false);
+    setEditedPm({ name: '', phone: '', email: '' });
+  };
+
+  const handleCancelPmEdit = () => {
+    setIsEditingPm(false);
+    setEditedPm({ name: '', phone: '', email: '' });
+  };
 
   const workers = [
     { id: 1, name: '김민수', phone: '010-1234-5678', hireDate: '2025-06-15', workerId: 'ms0315', disability: '지체장애' },
@@ -190,7 +208,7 @@ const CompanyDetail = ({ company, onClose }) => {
                 </h3>
                 {!isEditingPm ? (
                   <button
-                    onClick={() => setIsEditingPm(true)}
+                    onClick={handleEditPm}
                     className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <Edit3 className="w-4 h-4 text-gray-500" />
@@ -198,13 +216,13 @@ const CompanyDetail = ({ company, onClose }) => {
                 ) : (
                   <div className="flex gap-1">
                     <button
-                      onClick={() => setIsEditingPm(false)}
+                      onClick={handleCancelPmEdit}
                       className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                       <X className="w-4 h-4 text-gray-500" />
                     </button>
                     <button
-                      onClick={() => setIsEditingPm(false)}
+                      onClick={handleSavePm}
                       className="p-1.5 hover:bg-green-100 rounded-lg transition-colors"
                     >
                       <Save className="w-4 h-4 text-green-600" />
@@ -219,8 +237,8 @@ const CompanyDetail = ({ company, onClose }) => {
                   {isEditingPm ? (
                     <input
                       type="text"
-                      value={pmInfo.name}
-                      onChange={(e) => setPmInfo({...pmInfo, name: e.target.value})}
+                      value={editedPm.name}
+                      onChange={(e) => setEditedPm({...editedPm, name: e.target.value})}
                       className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   ) : (
@@ -233,8 +251,8 @@ const CompanyDetail = ({ company, onClose }) => {
                   {isEditingPm ? (
                     <input
                       type="text"
-                      value={pmInfo.phone}
-                      onChange={(e) => setPmInfo({...pmInfo, phone: e.target.value})}
+                      value={editedPm.phone}
+                      onChange={(e) => setEditedPm({...editedPm, phone: e.target.value})}
                       className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   ) : (
@@ -247,8 +265,8 @@ const CompanyDetail = ({ company, onClose }) => {
                   {isEditingPm ? (
                     <input
                       type="email"
-                      value={pmInfo.email}
-                      onChange={(e) => setPmInfo({...pmInfo, email: e.target.value})}
+                      value={editedPm.email}
+                      onChange={(e) => setEditedPm({...editedPm, email: e.target.value})}
                       className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   ) : (
@@ -360,8 +378,7 @@ const CompanyDetail = ({ company, onClose }) => {
                 ))}
               </div>
             </div>
-
-                      </div>
+          </div>
         </div>
       </div>
     </div>
