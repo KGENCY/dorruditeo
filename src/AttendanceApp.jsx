@@ -731,13 +731,7 @@ const AttendanceApp = ({ onClose }) => {
             </div>
 
             {/* 3. 자택 근무 활동 사진 첨부 */}
-            <div className="mx-6 sm:mx-8 mb-6 bg-[#FFF4EC] rounded-2xl p-5 border border-duru-orange-100">
-              <div className="flex items-center gap-2.5 mb-1">
-                <Camera className="w-5 h-5 text-duru-orange-500 shrink-0" />
-                <p className="text-base font-semibold text-gray-800 whitespace-nowrap">자택 근무 시 활동 사진을 꼭 함께 업로드해 주세요!</p>
-              </div>
-              <p className="text-sm text-gray-400 mb-4 ml-[30px]">*사진 첨부는 필수가 아닙니다.</p>
-
+            <div className="mx-6 sm:mx-8 mb-6">
               {/* 사진 미리보기 */}
               {photos.length > 0 && (
                 <div className="flex flex-wrap gap-3 mb-3">
@@ -756,7 +750,7 @@ const AttendanceApp = ({ onClose }) => {
               )}
 
               {/* 사진 추가 버튼 */}
-              <label className="flex items-center justify-center gap-2 w-full py-3 bg-white border-2 border-dashed border-duru-orange-200 rounded-xl cursor-pointer hover:bg-duru-orange-50 transition-colors">
+              <label className="flex items-center justify-center gap-2 w-full py-3 bg-[#FFF4EC] border-2 border-dashed border-duru-orange-200 rounded-xl cursor-pointer hover:bg-duru-orange-50 transition-colors">
                 <ImagePlus className="w-5 h-5 text-duru-orange-500" />
                 <span className="text-base font-semibold text-duru-orange-600">사진 추가하기</span>
                 <input
